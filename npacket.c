@@ -13,11 +13,17 @@
 
 int main(void)
 {
+    //init ncurse
+    initscr();
+    cbreak();
+    noecho();
+    nodelay(stdscr, TRUE);
+    scrollok(stdscr, TRUE);
+
     int sock_raw;
     uint8_t buffer[65535];
 
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    
 
     if(sock_raw < 0)
     {
@@ -25,19 +31,11 @@ int main(void)
         return 1;
 
     }
-    
 
     printf("Beginning reading Packets...\n");
 
-
-
     bool running = true;
     
-    initscr();
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
-    scrollok(stdscr, TRUE);
     while(running)
     {
         int ch = getch();
@@ -55,9 +53,12 @@ int main(void)
         //mvprintw(10,1,"hallo");
         //printf("%i\n", data_size);
 
-        printw("%li\n", data_size);
+        //printw("%li\n", data_size);
+        //printw("%i\n",buffer[4]);
+
+
+        refresh();
     }
-    refresh();
     endwin();
 
 

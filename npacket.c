@@ -33,6 +33,7 @@ int main(void)
     }
 
     printf("Beginning reading Packets...\n");
+    
 
     bool running = true;
     
@@ -52,10 +53,30 @@ int main(void)
         }
         //mvprintw(10,1,"hallo");
         //printf("%i\n", data_size);
-
+        
         //printw("%li\n", data_size);
         //printw("%i\n",buffer[4]);
+        printw("size: %6li  ||  ", data_size);
 
+
+        for(size_t i = 0; i < 6; i++)
+        {
+            printw("%2x ", buffer[i]);
+        }
+        printw(" || ");
+
+        for(size_t i = 6; i < 12; i++)
+        {
+            printw("%2x ", buffer[i]);
+        }
+
+        printw(" || ");
+        for(size_t i = 12; i < 14; i++)
+        {
+            printw("%2x", buffer[i]);
+
+        }
+        printw("\n");
 
         refresh();
     }

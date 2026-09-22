@@ -9,7 +9,9 @@
 #include <ncurses.h>
 
 
-
+/*
+    EthernetFrame -> IPV4 -> TCP
+*/
 
 int main(void)
 {
@@ -58,22 +60,33 @@ int main(void)
         //printw("%i\n",buffer[4]);
         printw("size: %6li  ||  ", data_size);
 
-
+        //Destination Mac
         for(size_t i = 0; i < 6; i++)
         {
             printw("%2x ", buffer[i]);
         }
         printw(" || ");
-
+        
+        //Source Mac
         for(size_t i = 6; i < 12; i++)
         {
             printw("%2x ", buffer[i]);
         }
-
+        
+        //Ethertype
         printw(" || ");
         for(size_t i = 12; i < 14; i++)
         {
             printw("%2x", buffer[i]);
+
+        }
+        printw(" || ");
+
+        
+        //IPV4 Protocol - Type
+        for(size_t i = 23; i < 24; i++)
+        {
+            printw("%4i", buffer[i]);
 
         }
         printw("\n");

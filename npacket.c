@@ -69,6 +69,7 @@ int main(void)
     {   
         uint8_t dst[6];
         uint8_t src[6];
+        uint8_t type[2];
     }
     typedef EthernetFrame;
 
@@ -138,8 +139,9 @@ int main(void)
         wprintw(win, " || ");
         for(size_t i = 12; i < 14; i++)
         {
-            wprintw(win, "%2x", buffer[i]);
-
+            //wprintw(win, "%2x", buffer[i]);
+            memcpy(&frame.type[i], &buffer[i],sizeof (frame.type[0]));
+            wprintw(win, "%2x", frame.type[i]);
         }
         wprintw(win, " || ");
 
@@ -155,7 +157,7 @@ int main(void)
         strcat(text, "asdf");
         //text = "geil";
 
-        wprintw(win, "%s\n", text);
+        //wprintw(win, "%s\n", text);
         refresh();
     }
     wprintw(win, "super");

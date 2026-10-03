@@ -91,7 +91,8 @@ int main(void)
         int ch = getch();
 
         if (ch == 'q') {
-            break; 
+            //running = false; 
+            break;
         }
 
         ssize_t data_size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);

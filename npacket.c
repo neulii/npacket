@@ -17,6 +17,8 @@ int main(void)
 {
     //init ncurse
     initscr();
+
+    //check if colors are possible in terminal
     if(has_colors() == FALSE)
     {
         endwin();
@@ -26,16 +28,10 @@ int main(void)
     start_color();
     
 
-
+    //define color pairs
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
-
-
-
-
-
-
-
+    init_pair(3,COLOR_BLUE, COLOR_BLACK);
 
     cbreak();
     noecho();
@@ -63,31 +59,42 @@ int main(void)
     int start_x = 10;
    
     WINDOW *title = newwin(3, 100, 2, 5);
-    WINDOW *frame = newwin(45, 100, 4, 5); //rahmenfenster
-    WINDOW *win = derwin(frame,44,98, 1,2); //window for text -> scrolling
+    WINDOW *windowFrame = newwin(45, 100, 4, 5); //rahmenfenster
+    WINDOW *win = derwin(windowFrame,44,98, 1,2); //window for text -> scrolling
 
     scrollok(win, TRUE); //allow srolling just the windo
 
+    //define Ehternet Frame struct
+    struct
+    {   
+        uint8_t dst[6];
+        uint8_t src[6];
+    }
+    typedef EthernetFrame;
+
     bool running = true;
+    
     
     while(running)
     {
-        
+        EthernetFrame frame;
 
-        box(title, 0,0);
-        
+        box(title, 0,0);   
         wrefresh(title);
-        box(frame,0,0); 
-        wrefresh(frame);
-
+        
+        box(windowFrame,0,0); 
+        wrefresh(windowFrame);
+        
         //box(win,1,1);
         wrefresh(win);
-        wrefresh(frame);
-
+        wrefresh(windowFrame);
+        
         wattron(title, COLOR_PAIR(1));;
         mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
-
+        
         wattroff(title, COLOR_PAIR(1));;
+        
+        
         int ch = getch();
 
         if (ch == 'q') {
@@ -111,14 +118,20 @@ int main(void)
         //Destination Mac
         for(size_t i = 0; i < 6; i++)
         {
-            wprintw(win, "%2x ", buffer[i]);
+            memcpy(&frame.dst[i], &buffer[i],sizeof (frame.dst[0]));
+
+            //wprintw(win, "%2x ", buffer[i]);
+            wprintw(win, "%2x ", frame.dst[i]);
         }
         wprintw(win, " || ");
         
         //Source Mac
         for(size_t i = 6; i < 12; i++)
         {
-            wprintw(win, "%2x ", buffer[i]);
+            //wprintw(win, "%2x ", buffer[i]);
+            memcpy(&frame.src[i], &buffer[i],sizeof (frame.src[0]));
+            wprintw(win, "%2x ", frame.src[i]);
+
         }
         
         //Ethertype
@@ -138,9 +151,14 @@ int main(void)
 
         }
         wprintw(win, "\n");
-      
+        char text[100] = "super";
+        strcat(text, "asdf");
+        //text = "geil";
+
+        wprintw(win, "%s\n", text);
         refresh();
     }
+    wprintw(win, "super");
     endwin();
 
 

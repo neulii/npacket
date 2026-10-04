@@ -53,21 +53,48 @@ int main(void)
 
     printf("Beginning reading Packets...\n");
     
-
-    int height = 40;
+    //paint Window
+    
     int width = 100;
-    int start_y = 10;
-    int start_x = 10;
-   
-    WINDOW *title = newwin(3, 100, 2, 5);
-    WINDOW *windowFrame = newwin(45, 100, 4, 5); //rahmenfenster
-    WINDOW *win = derwin(windowFrame,44,98, 1,2); //window for text -> scrolling
+    int titleHeight = 3;
+    int windowFrameHeight = 45; 
+    int titleStartX = 5;
+    int titleStartY = 2;
+    int windowStartX = 5;
+    int windowStartY = 4;
 
+    //windows for title
+    WINDOW *title = newwin(
+        titleHeight, 
+        width, 
+        titleStartY, 
+        titleStartX
+    );
+   
+    //rahmen -> aussenfenster
+    WINDOW *windowFrame = newwin(
+        windowFrameHeight, 
+        width, 
+        windowStartY, 
+        windowStartX 
+    );
+    
+    //create subwindow  
+    //window for text -> scrolling
+
+    WINDOW *win = derwin(
+        windowFrame,
+        44,
+        98,
+        1,
+        2
+    );
+    
     scrollok(win, TRUE); //allow srolling just the windo
 
     //define Ehternet Frame struct
     typedef struct
-    {   
+    {
         uint8_t dst[6];
         uint8_t src[6];
         uint8_t type[2];

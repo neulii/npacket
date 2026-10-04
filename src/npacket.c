@@ -1,3 +1,4 @@
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -65,13 +66,23 @@ int main(void)
     scrollok(win, TRUE); //allow srolling just the windo
 
     //define Ehternet Frame struct
-    struct
+    typedef struct
     {   
         uint8_t dst[6];
         uint8_t src[6];
         uint8_t type[2];
-    }
-    typedef EthernetFrame;
+        void *Layer3;
+
+    } EthernetFrame;
+
+    typedef struct
+    {
+        uint8_t dst_ip[8];
+    } IPV4_Tcp;
+
+
+
+
 
     bool running = true;
     

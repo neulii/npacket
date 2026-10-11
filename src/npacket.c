@@ -92,6 +92,17 @@ int main(void)
     
     scrollok(win, TRUE); //allow srolling just the windo
 
+
+    /*
+    Offset of Datatypes in Buffer:
+    */
+
+    
+    uint8_t posDstMac = 0;      uint8_t lDstMac = 6;
+    uint8_t posSrcMac = 6;      uint8_t lSrcMac = 6;
+    uint8_t posEthertype = 12;  uint8_t lEthertype = 2;
+    
+
     //Layer 3
     typedef struct
     {
@@ -160,21 +171,19 @@ int main(void)
         wprintw(win, "%6li  ||  ", data_size);
 
         //Destination Mac
-        for(size_t i = 0; i < 6; i++)
+        for(size_t i = posDstMac; i < lDstMac; i++)
         {
             memcpy(&frame.dst[i], &buffer[i],sizeof (frame.dst[0]));
-
-            //wprintw(win, "%2x ", buffer[i]);
             wprintw(win, "%2x ", frame.dst[i]);
         }
         wprintw(win, " || ");
         
-        //Source Mac
-        for(size_t i = 6; i < 12; i++)
+        //TODO Byteweises kopieren?  warum nicht den ganzen bereich....????
+        //Source Mac 
+        for(size_t i = posSrcMac, j = 0; i < (posSrcMac + lSrcMac); j++, i++)
         {
-            //wprintw(win, "%2x ", buffer[i]);
-            memcpy(&frame.src[i], &buffer[i],sizeof (frame.src[0]));
-            wprintw(win, "%2x ", frame.src[i]);
+            memcpy(&frame.src[j], &buffer[i],sizeof (frame.src[0]));
+            wprintw(win, "%2x ", frame.src[j]);
 
         }
         

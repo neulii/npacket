@@ -92,24 +92,25 @@ int main(void)
     
     scrollok(win, TRUE); //allow srolling just the windo
 
+    //Layer 3
+    typedef struct
+    {
+        uint8_t protocol[2];
+        uint8_t src_ip[4];
+        uint8_t dst_ip[4];
+
+    } IPV4;
+
+    //Layer 2
     //define Ehternet Frame struct
     typedef struct
     {
         uint8_t dst[6];
         uint8_t src[6];
         uint8_t type[2];
-        void *Layer3;
+        IPV4 *nextLayer;
 
     } EthernetFrame;
-
-    typedef struct
-    {
-        uint8_t dst_ip[8];
-    } IPV4_Tcp;
-
-
-
-
 
     bool running = true;
     
@@ -117,6 +118,10 @@ int main(void)
     while(running)
     {
         EthernetFrame frame;
+        IPV4 packet;
+
+        frame.nextLayer = &packet;
+
 
         box(title, 0,0);   
         wrefresh(title);
@@ -183,12 +188,17 @@ int main(void)
         }
         wprintw(win, " || ");
 
-        
         //IPV4 Protocol - Type
         for(size_t i = 23; i < 24; i++)
         {
-            wprintw(win, "%4i", buffer[i]);
-
+           
+            memcpy(&frame.nextLayer->protocol[i], &buffer[i],sizeof (frame.nextLayer->protocol[0]));
+            //memcpy(&packet.protocol[i], &buffer[i],sizeof (packet.protocol[0]));
+            
+            wprintw(win, "%4i", frame.nextLayer->protocol[i]);
+            //wprintw(win, "%4i", packet.protocol[i]);
+            //wprintw(win, "%4i", buffer[i]);
+            
         }
         wprintw(win, "\n");
         char text[100] = "super";

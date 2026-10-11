@@ -9,10 +9,8 @@
 #include <net/ethernet.h>
 #include <ncurses.h>
 
+#include "types.h"
 
-/*
-    EthernetFrame -> IPV4 -> TCP
-*/
 
 int main(void)
 {
@@ -92,37 +90,6 @@ int main(void)
     
     scrollok(win, TRUE); //allow srolling just the windo
 
-
-    /*
-    Offset of Datatypes in Buffer:
-    */
-
-    
-    uint8_t posDstMac = 0;      uint8_t lDstMac = 6;
-    uint8_t posSrcMac = 6;      uint8_t lSrcMac = 6;
-    uint8_t posEthertype = 12;  uint8_t lEthertype = 2;
-    
-
-    //Layer 3
-    typedef struct
-    {
-        uint8_t protocol[2];
-        uint8_t src_ip[4];
-        uint8_t dst_ip[4];
-
-    } IPV4;
-
-    //Layer 2
-    //define Ehternet Frame struct
-    typedef struct
-    {
-        uint8_t dst[6];
-        uint8_t src[6];
-        uint8_t type[2];
-        IPV4 *nextLayer;
-
-    } EthernetFrame;
-
     bool running = true;
     
     
@@ -163,30 +130,25 @@ int main(void)
             perror("Error when Reading Data...\n");
             return 1;
         }
-        //mvprintw(10,1,"hallo");
-        //printf("%i\n", data_size);
         
-        //printw("%li\n", data_size);
-        //printw("%i\n",buffer[4]);
         wprintw(win, "%6li  ||  ", data_size);
 
         //Destination Mac
-        for(size_t i = posDstMac; i < lDstMac; i++)
+        memcpy(&frame.dst[0], &buffer[posDstMac],sizeof(frame.src[0]) * lSrcMac);
+        for(size_t i = 0; i < lDstMac; i++)
         {
-            memcpy(&frame.dst[i], &buffer[i],sizeof (frame.dst[0]));
             wprintw(win, "%2x ", frame.dst[i]);
         }
         wprintw(win, " || ");
         
-        //TODO Byteweises kopieren?  warum nicht den ganzen bereich....????
-        //Source Mac 
-        for(size_t i = posSrcMac, j = 0; i < (posSrcMac + lSrcMac); j++, i++)
+        //Source Mac
+        memcpy(&frame.src[0], &buffer[posSrcMac],sizeof (frame.src[0]) * lSrcMac);
+    
+        for(size_t i = 0; i < lSrcMac; i++)
         {
-            memcpy(&frame.src[j], &buffer[i],sizeof (frame.src[0]));
-            wprintw(win, "%2x ", frame.src[j]);
-
+            wprintw(win, "%2x ", frame.src[i]);
         }
-        
+
         //Ethertype
         wprintw(win, " || ");
         for(size_t i = 12; i < 14; i++)

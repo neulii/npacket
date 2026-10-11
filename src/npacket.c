@@ -134,7 +134,7 @@ int main(void)
         wprintw(win, "%6li  ||  ", data_size);
 
         //Destination Mac
-        memcpy(&frame.dst[0], &buffer[posDstMac],sizeof(frame.src[0]) * lSrcMac);
+        memcpy(&frame.dst[0], &buffer[posDstMac],sizeof(frame.dst[0]) * lDstMac);
         for(size_t i = 0; i < lDstMac; i++)
         {
             wprintw(win, "%2x ", frame.dst[i]);
@@ -143,33 +143,33 @@ int main(void)
         
         //Source Mac
         memcpy(&frame.src[0], &buffer[posSrcMac],sizeof (frame.src[0]) * lSrcMac);
-    
         for(size_t i = 0; i < lSrcMac; i++)
         {
             wprintw(win, "%2x ", frame.src[i]);
         }
+        wprintw(win, " || ");
 
         //Ethertype
-        wprintw(win, " || ");
-        for(size_t i = 12; i < 14; i++)
+        memcpy(&frame.type[0], &buffer[posEthertype],sizeof (frame.type[0])*lEthertype);
+        for(size_t i = 0; i < lEthertype; i++)
         {
-            //wprintw(win, "%2x", buffer[i]);
-            memcpy(&frame.type[i], &buffer[i],sizeof (frame.type[0]));
             wprintw(win, "%2x", frame.type[i]);
         }
         wprintw(win, " || ");
 
+
+        uint8_t posIPV4 = posPayload;
+
         //IPV4 Protocol - Type
-        for(size_t i = 23; i < 24; i++)
+        memcpy(
+            &frame.nextLayer->protocol[0], 
+            &buffer[posIPV4 + posProto],
+            sizeof (frame.nextLayer->protocol[0]) * lProto
+        );
+        
+        for(size_t i = 0; i < lProto; i++)
         {
-           
-            memcpy(&frame.nextLayer->protocol[i], &buffer[i],sizeof (frame.nextLayer->protocol[0]));
-            //memcpy(&packet.protocol[i], &buffer[i],sizeof (packet.protocol[0]));
-            
             wprintw(win, "%4i", frame.nextLayer->protocol[i]);
-            //wprintw(win, "%4i", packet.protocol[i]);
-            //wprintw(win, "%4i", buffer[i]);
-            
         }
         wprintw(win, "\n");
         char text[100] = "super";

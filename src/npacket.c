@@ -42,14 +42,13 @@ int main(void)
 
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
+    //exit when error by opening the socket
     if(sock_raw < 0)
     {
         perror("Socket Error!\n");
         return 1;
 
     }
-
-    printf("Beginning reading Packets...\n");
     
     //paint Window
     
@@ -90,17 +89,20 @@ int main(void)
     
     scrollok(win, TRUE); //allow srolling just the windo
 
-    bool running = true;
     
+    EthernetFrame frame;
+    IPV4 ipv4;
+    frame.nextLayer = &ipv4;
+    IPV4 *packet= frame.nextLayer;
+
+    //textline for output
+    
+    bool running = true;
     
     while(running)
     {
-        EthernetFrame frame;
-        IPV4 ipv4;
-        frame.nextLayer = &ipv4;
-        IPV4 *packet= frame.nextLayer;
 
-
+        
         box(title, 0,0);   
         wrefresh(title);
         
@@ -115,12 +117,16 @@ int main(void)
         mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
         
         wattroff(title, COLOR_PAIR(1));;
+    
         
+        char outputText[100] = "";
+        char outputTemp[100] = "";
+
         
         int ch = getch();
 
+        //quit loop by pressing q
         if (ch == 'q') {
-            //running = false; 
             break;
         }
 
@@ -137,8 +143,13 @@ int main(void)
         memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
         for(size_t i = 0; i < ETH_DST_LENGTH; i++)
         {
-            wprintw(win, "%2x ", frame.dst[i]);
+            sprintf(outputTemp, "%2x ", frame.dst[i]);
+            strcat(outputText, outputTemp);
+            
+            //wprintw(win, "%2x ", frame.dst[i]);
         }
+
+        wprintw(win, outputText,"");
         wprintw(win, " || ");
         
         //Source Mac
@@ -172,9 +183,14 @@ int main(void)
         {
             wprintw(win, "%4i", packet->protocol[i]);
         }
+
+
+
+
+
         wprintw(win, "\n");
-        char text[100] = "super";
-        strcat(text, "asdf");
+        //char text[100] = "super";
+        //strcat(text, "asdf");
         //text = "geil";
 
         //wprintw(win, "%s\n", text);

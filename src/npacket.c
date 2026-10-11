@@ -96,9 +96,9 @@ int main(void)
     while(running)
     {
         EthernetFrame frame;
-        IPV4 packet;
-
-        frame.nextLayer = &packet;
+        IPV4 ipv4;
+        frame.nextLayer = &ipv4;
+        IPV4 *packet= frame.nextLayer;
 
 
         box(title, 0,0);   
@@ -134,42 +134,43 @@ int main(void)
         wprintw(win, "%6li  ||  ", data_size);
 
         //Destination Mac
-        memcpy(&frame.dst[0], &buffer[posDstMac],sizeof(frame.dst[0]) * lDstMac);
-        for(size_t i = 0; i < lDstMac; i++)
+        memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
+        for(size_t i = 0; i < ETH_DST_LENGTH; i++)
         {
             wprintw(win, "%2x ", frame.dst[i]);
         }
         wprintw(win, " || ");
         
         //Source Mac
-        memcpy(&frame.src[0], &buffer[posSrcMac],sizeof (frame.src[0]) * lSrcMac);
-        for(size_t i = 0; i < lSrcMac; i++)
+        memcpy(&frame.src[0], &buffer[ETH_SRC_OFFSET],sizeof (frame.src[0]) * ETH_SRC_LENGTH);
+        for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
         {
             wprintw(win, "%2x ", frame.src[i]);
         }
         wprintw(win, " || ");
 
         //Ethertype
-        memcpy(&frame.type[0], &buffer[posEthertype],sizeof (frame.type[0])*lEthertype);
-        for(size_t i = 0; i < lEthertype; i++)
+        memcpy(&frame.type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame.type[0])*ETH_TYPE_LENGTH);
+        for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
         {
             wprintw(win, "%2x", frame.type[i]);
         }
         wprintw(win, " || ");
 
 
-        uint8_t posIPV4 = posPayload;
+        uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
 
         //IPV4 Protocol - Type
         memcpy(
-            &frame.nextLayer->protocol[0], 
-            &buffer[posIPV4 + posProto],
-            sizeof (frame.nextLayer->protocol[0]) * lProto
+            
+            &packet->protocol[0], 
+            &buffer[posIPV4 + IP_PROT_OFFSET],
+            sizeof (packet->protocol[0]) * IP_PROT_LENGTH
         );
         
-        for(size_t i = 0; i < lProto; i++)
+        for(size_t i = 0; i < IP_PROT_LENGTH; i++)
         {
-            wprintw(win, "%4i", frame.nextLayer->protocol[i]);
+            wprintw(win, "%4i", packet->protocol[i]);
         }
         wprintw(win, "\n");
         char text[100] = "super";

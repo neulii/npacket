@@ -23,6 +23,7 @@ enum IPV
 
 typedef struct
 {
+    ssize_t size;
     uint8_t dst[6];
     uint8_t src[6];
     uint8_t type[2];

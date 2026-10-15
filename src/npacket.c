@@ -147,12 +147,17 @@ int main(void)
         
         uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
 
-        //create frame for access (because its from a void pointer)
-        IPV4 *packet= frame.nextLayer;
-        
-        //IPV4 Protocol - Type
-        memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
-
+        //if IP Protocol 0x0800
+        if(frame.type[0]==8 && frame.type[1] == 0)
+        {
+            
+            //create frame for access (because its from a void pointer)
+            IPV4 *packet= frame.nextLayer;
+            
+            //IPV4 Protocol - Type
+            memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
+            
+        }
         printOutputLine(&frame, win);
 
         refresh();

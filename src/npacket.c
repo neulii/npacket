@@ -32,7 +32,7 @@ int main(void)
     //define color pairs
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3,COLOR_BLUE, COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_BLACK);
 
     cbreak();
     noecho();
@@ -95,7 +95,6 @@ int main(void)
     EthernetFrame frame;
     IPV4 ipv4;
     frame.nextLayer = &ipv4;
-    IPV4 *packet= frame.nextLayer;
 
     //textline for output
     
@@ -146,27 +145,16 @@ int main(void)
         //Ethertype
         memcpy(&frame.type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame.type[0])*ETH_TYPE_LENGTH);
         
-        printOutputLine(&frame, win);
         uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
 
-        //IPV4 Protocol - Type
-        memcpy(
-            
-            &packet->protocol[0], 
-            &buffer[posIPV4 + IP_PROT_OFFSET],
-            sizeof (packet->protocol[0]) * IP_PROT_LENGTH
-        );
+        //create frame for access (because its from a void pointer)
+        IPV4 *packet= frame.nextLayer;
         
-        for(size_t i = 0; i < IP_PROT_LENGTH; i++)
-        {
-            wprintw(win, "%4i", packet->protocol[i]);
-        }
+        //IPV4 Protocol - Type
+        memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
 
+        printOutputLine(&frame, win);
 
-
-
-
-        wprintw(win, "\n");
         //char text[100] = "super";
         //strcat(text, "asdf");
         //text = "geil";
@@ -185,18 +173,18 @@ int main(void)
 void printOutputLine(EthernetFrame* frame, WINDOW* window)
 {
  
-     char outputText[100] = "";
-     char outputTemp[100] = "";
+    char outputText[100] = "";
+    char outputTemp[100] = "";
 
-     for(size_t i = 0; i < ETH_DST_LENGTH; i++)
-        {
-            sprintf(outputTemp, "%2x ", frame->dst[i]);
-            strcat(outputText, outputTemp);
-            
-            //wprintw(win, "%2x ", frame.dst[i]);
-        }
-     wprintw(window, outputText,"");
-     wprintw(window, " || ");
+    for(size_t i = 0; i < ETH_DST_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%2x ", frame->dst[i]);
+        strcat(outputText, outputTemp);
+   
+        //wprintw(win, "%2x ", frame.dst[i]);
+    }
+    wprintw(window, outputText,"");
+    wprintw(window, " || ");
         
     for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
     {
@@ -210,12 +198,14 @@ void printOutputLine(EthernetFrame* frame, WINDOW* window)
     }
     wprintw(window, " || ");
 
+    IPV4 *packet= frame->nextLayer;
+ 
+    for(size_t i = 0; i < IP_PROT_LENGTH; i++)
+    {
+        wprintw(window, "%4i", packet->protocol[i]);
+    }
 
-
-
-
-
-
+    wprintw(window, "\n");
 }
 
 

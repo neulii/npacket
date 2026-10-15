@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+void printOutputLine(EthernetFrame* frame, WINDOW* window);
+
 
 int main(void)
 {
@@ -118,11 +120,7 @@ int main(void)
         
         wattroff(title, COLOR_PAIR(1));;
     
-        
-        char outputText[100] = "";
-        char outputTemp[100] = "";
-
-        
+               
         int ch = getch();
 
         //quit loop by pressing q
@@ -141,34 +139,14 @@ int main(void)
 
         //Destination Mac
         memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
-        for(size_t i = 0; i < ETH_DST_LENGTH; i++)
-        {
-            sprintf(outputTemp, "%2x ", frame.dst[i]);
-            strcat(outputText, outputTemp);
-            
-            //wprintw(win, "%2x ", frame.dst[i]);
-        }
 
-        wprintw(win, outputText,"");
-        wprintw(win, " || ");
-        
         //Source Mac
         memcpy(&frame.src[0], &buffer[ETH_SRC_OFFSET],sizeof (frame.src[0]) * ETH_SRC_LENGTH);
-        for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
-        {
-            wprintw(win, "%2x ", frame.src[i]);
-        }
-        wprintw(win, " || ");
-
+        
         //Ethertype
         memcpy(&frame.type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame.type[0])*ETH_TYPE_LENGTH);
-        for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
-        {
-            wprintw(win, "%2x", frame.type[i]);
-        }
-        wprintw(win, " || ");
-
-
+        
+        printOutputLine(&frame, win);
         uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
 
         //IPV4 Protocol - Type
@@ -203,3 +181,41 @@ int main(void)
 
     return 0;
 }
+
+void printOutputLine(EthernetFrame* frame, WINDOW* window)
+{
+ 
+     char outputText[100] = "";
+     char outputTemp[100] = "";
+
+     for(size_t i = 0; i < ETH_DST_LENGTH; i++)
+        {
+            sprintf(outputTemp, "%2x ", frame->dst[i]);
+            strcat(outputText, outputTemp);
+            
+            //wprintw(win, "%2x ", frame.dst[i]);
+        }
+     wprintw(window, outputText,"");
+     wprintw(window, " || ");
+        
+    for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
+    {
+        wprintw(window, "%2x ", frame->src[i]); 
+    }
+    wprintw(window, " || ");
+
+    for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
+    {
+         wprintw(window, "%2x", frame->type[i]);
+    }
+    wprintw(window, " || ");
+
+
+
+
+
+
+
+}
+
+

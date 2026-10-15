@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-
+#include <stdint.h>
 //Layer 3
 
 typedef struct
@@ -19,9 +19,8 @@ enum IPV
     IP_PROT_LENGTH     = 1
 };
 
-//Layer 2
+//Layer 2  -> EthernetFrame
 
-//TODO nextlayer als void pointer
 typedef struct
 {
     uint8_t dst[6];

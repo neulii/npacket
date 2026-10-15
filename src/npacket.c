@@ -127,14 +127,14 @@ int main(void)
             break;
         }
 
-        ssize_t data_size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
-        if(data_size < 0)
+        frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+        if(frame.size < 0)
         {
             perror("Error when Reading Data...\n");
             return 1;
         }
         
-        wprintw(win, "%6li  ||  ", data_size);
+        
 
         //Destination Mac
         memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
@@ -155,57 +155,65 @@ int main(void)
 
         printOutputLine(&frame, win);
 
-        //char text[100] = "super";
-        //strcat(text, "asdf");
-        //text = "geil";
-
-        //wprintw(win, "%s\n", text);
         refresh();
     }
     wprintw(win, "super");
     endwin();
 
-
-
     return 0;
 }
 
+//prints the out a line in the window with ethernet
 void printOutputLine(EthernetFrame* frame, WINDOW* window)
 {
  
     char outputText[100] = "";
     char outputTemp[100] = "";
 
+    //size
+    sprintf(outputTemp, "%5li  ||  ", frame->size);
+    strcat(outputText, outputTemp);
+
+    //dst mac
     for(size_t i = 0; i < ETH_DST_LENGTH; i++)
     {
         sprintf(outputTemp, "%2x ", frame->dst[i]);
         strcat(outputText, outputTemp);
-   
-        //wprintw(win, "%2x ", frame.dst[i]);
     }
-    wprintw(window, outputText,"");
-    wprintw(window, " || ");
-        
+    
+    strcat(outputText, " || ");
+    
+    //src mac
     for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
     {
-        wprintw(window, "%2x ", frame->src[i]); 
+        sprintf(outputTemp, "%2x ", frame->src[i]);
+        strcat(outputText, outputTemp);
     }
-    wprintw(window, " || ");
-
+    
+    strcat(outputText, " || ");
+    
+    //ethertype
     for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
     {
-         wprintw(window, "%2x", frame->type[i]);
+        sprintf(outputTemp, "%2x ", frame->type[i]);
+        strcat(outputText, outputTemp);
     }
-    wprintw(window, " || ");
+    
+    strcat(outputText, " || ");
 
+    
+    
+    //ip 
     IPV4 *packet= frame->nextLayer;
- 
+    
     for(size_t i = 0; i < IP_PROT_LENGTH; i++)
     {
-        wprintw(window, "%4i", packet->protocol[i]);
+        sprintf(outputTemp, "%4i", packet->protocol[i]);
+        strcat(outputText, outputTemp);
     }
-
-    wprintw(window, "\n");
+    
+    strcat(outputText, "\n");
+  
+    //prints the finished line
+    wprintw(window,outputText);
 }
-
-

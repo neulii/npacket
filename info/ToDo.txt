@@ -1,3 +1,5 @@
 - save capture files
 - open capture files
 - add timestamp
+
+filter for src/dst and so on.

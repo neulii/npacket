@@ -220,5 +220,5 @@ void printOutputLine(EthernetFrame* frame, WINDOW* window)
     strcat(outputText, "\n");
   
     //prints the finished line
-    wprintw(window,outputText);
+    wprintw(window,outputText, "");
 }

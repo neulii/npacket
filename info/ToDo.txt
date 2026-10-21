@@ -1,2 +1,3 @@
 - save capture files
 - open capture files
+- add timestamp

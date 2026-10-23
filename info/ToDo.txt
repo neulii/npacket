@@ -2,4 +2,6 @@
 - open capture files
 - add timestamp
 
-filter for src/dst and so on.
+- filter for src/dst and so on.
+
+- implement all code with pcap

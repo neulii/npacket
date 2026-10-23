@@ -146,19 +146,45 @@ int main(void)
         memcpy(&frame.type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame.type[0])*ETH_TYPE_LENGTH);
         
         uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
+        
+        //converts 2 bytes in one datatype for comparing in switch
+        int16_t etherType = ((uint16_t)frame.type[0] << 8) | frame.type[1];
+        
+        //here printing first segment of outputline -> ehternet
 
-        //if IP Protocol 0x0800
-        if(frame.type[0]==8 && frame.type[1] == 0)
+
+        switch (etherType)
         {
+            //if IP Protocol 0x0800
+            case 0x0800:
+                //create frame for access (because its from a void pointer)
+                IPV4 *packet= frame.nextLayer;
+                
+                //IPV4 Protocol - Type
+                memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
+                
+                printOutputLine(&frame, win);
+                // -> here print the specific part
+                break;
             
-            //create frame for access (because its from a void pointer)
-            IPV4 *packet= frame.nextLayer;
-            
-            //IPV4 Protocol - Type
-            memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
-            
+            //if ARP Protocol 0x0806
+            case 0x0806:
+                //create frame for access (because its from a void pointer)
+                ARP *ARPpacket= frame.nextLayer;
+                
+                //IPV4 Protocol - Type
+                //memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
+                
+                printOutputLine(&frame, win);
+                // -> here print the specific part
+                break;
+            default:
+                break;
         }
-        printOutputLine(&frame, win);
+
+
+      
+
 
         refresh();
     }
@@ -169,6 +195,7 @@ int main(void)
 }
 
 //prints the out a line in the window with ethernet
+//TODO must be changed -> just prints the same by all types
 void printOutputLine(EthernetFrame* frame, WINDOW* window)
 {
  

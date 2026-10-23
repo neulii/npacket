@@ -2,7 +2,13 @@
 #define TYPES_H
 
 #include <stdint.h>
+
+
 //Layer 3
+
+//================         IPV4 Definition        ================
+
+
 
 typedef struct
 {
@@ -13,11 +19,40 @@ typedef struct
 
 } IPV4;
 
-enum IPV
+//describes the positions and offsets of the fields
+enum IPV4Data
 {
     IP_PROT_OFFSET     = 9,
     IP_PROT_LENGTH     = 1
 };
+
+
+
+//================         ARP Definition        ================
+
+
+
+typedef struct
+{
+    uint8_t protocol[2];
+    uint8_t src_ip[4];
+    uint8_t dst_ip[4];
+    
+
+} ARP;
+
+//describes the positions and offsets of the fields
+enum ARPData
+{
+    ARP_PROT_OFFSET     = 0,
+    ARP_PROT_LENGTH     = 0
+};
+
+
+//==================================================================
+
+
+
 
 //Layer 2  -> EthernetFrame
 
@@ -31,6 +66,7 @@ typedef struct
 
 } EthernetFrame;
 
+//describes the positions and offsets of the fields
 enum EthernetData
 {
     ETH_DST_OFFSET     = 0,

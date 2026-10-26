@@ -7,38 +7,15 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <net/ethernet.h>
-#include <ncurses.h>
+//#include <ncurses.h>
 
 #include "types.h"
 
-void printOutputLine(EthernetFrame* frame, WINDOW* window);
+void printOutputLine(EthernetFrame* frame);
 
 
 int main(void)
 {
-    //init ncurse
-    initscr();
-
-    //check if colors are possible in terminal
-    if(has_colors() == FALSE)
-    {
-        endwin();
-        printf("Terminal cant show Colors!!!");
-        exit(1);
-    }
-    start_color();
-    
-
-    //define color pairs
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_BLUE, COLOR_BLACK);
-
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
-    //scrollok(stdscr, TRUE);  //scrolling the whole terminal 
-
     int sock_raw;
     uint8_t buffer[65535];
 
@@ -51,47 +28,7 @@ int main(void)
         return 1;
 
     }
-    
-    //paint Window
-    
-    int width = 100;
-    int titleHeight = 3;
-    int windowFrameHeight = 45; 
-    int titleStartX = 5;
-    int titleStartY = 2;
-    int windowStartX = 5;
-    int windowStartY = 4;
-
-    //windows for title
-    WINDOW *title = newwin(
-        titleHeight, 
-        width, 
-        titleStartY, 
-        titleStartX
-    );
    
-    //rahmen -> aussenfenster
-    WINDOW *windowFrame = newwin(
-        windowFrameHeight, 
-        width, 
-        windowStartY, 
-        windowStartX 
-    );
-    
-    //create subwindow  
-    //window for text -> scrolling
-
-    WINDOW *win = derwin(
-        windowFrame,
-        44,
-        98,
-        1,
-        2
-    );
-    
-    scrollok(win, TRUE); //allow srolling just the windo
-
-    
     EthernetFrame frame;
     IPV4 ipv4;
     frame.nextLayer = &ipv4;
@@ -103,31 +40,10 @@ int main(void)
     while(running)
     {
 
+       //mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
         
-        box(title, 0,0);   
-        wrefresh(title);
-        
-        box(windowFrame,0,0); 
-        wrefresh(windowFrame);
-        
-        //box(win,1,1);
-        wrefresh(win);
-        wrefresh(windowFrame);
-        
-        wattron(title, COLOR_PAIR(1));;
-        mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
-        
-        wattroff(title, COLOR_PAIR(1));;
     
-               
-        int ch = getch();
-
-        //quit loop by pressing q
-        if (ch == 'q') {
-            break;
-        }
-
-        frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+           frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
         if(frame.size < 0)
         {
             perror("Error when Reading Data...\n");
@@ -163,8 +79,9 @@ int main(void)
                 //IPV4 Protocol - Type
                 memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
                 
-                printOutputLine(&frame, win);
                 // -> here print the specific part
+        
+                printOutputLine(&frame);
                 break;
             
             //if ARP Protocol 0x0806
@@ -175,8 +92,9 @@ int main(void)
                 //IPV4 Protocol - Type
                 //memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
                 
-                printOutputLine(&frame, win);
                 // -> here print the specific part
+                
+                printOutputLine(&frame);
                 break;
             default:
                 break;
@@ -186,17 +104,17 @@ int main(void)
       
 
 
-        refresh();
+        //refresh();
     }
-    wprintw(win, "super");
-    endwin();
+    //wprintw(win, "super");
+    //endwin();
 
     return 0;
 }
 
 //prints the out a line in the window with ethernet
 //TODO must be changed -> just prints the same by all types
-void printOutputLine(EthernetFrame* frame, WINDOW* window)
+void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
 {
  
     char outputText[100] = "";
@@ -247,5 +165,7 @@ void printOutputLine(EthernetFrame* frame, WINDOW* window)
     strcat(outputText, "\n");
   
     //prints the finished line
-    wprintw(window,outputText, "");
+    //wprintw(window,outputText, "");
+    printf("%s",outputText);
+
 }

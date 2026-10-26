@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project (npacket C)
 
-find_package(Curses REQUIRED)
+#find_package(Curses REQUIRED)
 
 set (SOURCES
     src/npacket.c
@@ -22,4 +22,5 @@ add_custom_command(TARGET npacket POST_BUILD
     COMMENT "Setting capabilities for packet capture"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE  ${CURSES_LIBRARIES})
+#target_link_libraries(${PROJECT_NAME} PRIVATE  ${CURSES_LIBRARIES})
+target_link_libraries(${PROJECT_NAME})

@@ -146,7 +146,7 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
     //ethertype
     for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
     {
-        sprintf(outputTemp, "%2x ", frame->type[i]);
+        sprintf(outputTemp, "%2x", frame->type[i]);
         strcat(outputText, outputTemp);
     }
     
@@ -156,7 +156,8 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
     
     //ip 
     IPV4 *packet= frame->nextLayer;
-    
+   
+    //Protocol
     for(size_t i = 0; i < IP_PROT_LENGTH; i++)
     {
         sprintf(outputTemp, "%4i", packet->protocol[i]);
@@ -168,18 +169,20 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
     //src addr 
     for(size_t i = 0; i < IP_SRC_LENGTH; i++)
     {
-        sprintf(outputTemp, "%4d ", packet->src_ip[i]);
+        sprintf(outputTemp, "%4d", packet->src_ip[i]);
         strcat(outputText, outputTemp);
     }
     
     strcat(outputText, " || ");
-    
+     
+    //dst addr 
     for(size_t i = 0; i < IP_DST_LENGTH; i++)
     {
-        sprintf(outputTemp, "%4d ", packet->dst_ip[i]);
+        sprintf(outputTemp, "%4d", packet->dst_ip[i]);
+        //printf("%s",outputTemp); 
         strcat(outputText, outputTemp);
     }
-    
+     
   
     strcat(outputText, "\n");
     //prints the finished line

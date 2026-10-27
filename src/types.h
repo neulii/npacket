@@ -23,7 +23,12 @@ typedef struct
 enum IPV4Data
 {
     IP_PROT_OFFSET     = 9,
-    IP_PROT_LENGTH     = 1
+    IP_PROT_LENGTH     = 1,
+    IP_SRC_OFFSET      = 24,
+    IP_SRC_LENGTH      = 4,
+    IP_DST_OFFSET      = 32,
+    IP_DST_LENGTH      =4
+
 };
 
 
@@ -42,6 +47,7 @@ typedef struct
 } ARP;
 
 //describes the positions and offsets of the fields
+
 enum ARPData
 {
     ARP_PROT_OFFSET     = 0,

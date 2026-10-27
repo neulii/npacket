@@ -31,7 +31,7 @@ int main(void)
    
     EthernetFrame frame;
     IPV4 ipv4;
-    frame.nextLayer = &ipv4;
+    //frame.nextLayer = &ipv4;
 
     //textline for output
     
@@ -42,8 +42,8 @@ int main(void)
 
        //mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
         
-    
-           frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+        frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+        
         if(frame.size < 0)
         {
             perror("Error when Reading Data...\n");
@@ -68,17 +68,18 @@ int main(void)
         
         //here printing first segment of outputline -> ehternet
 
-
         switch (etherType)
         {
             //if IP Protocol 0x0800
             case 0x0800:
                 //create frame for access (because its from a void pointer)
+     
+                frame.nextLayer = &ipv4;
                 IPV4 *packet= frame.nextLayer;
                 
                 //IPV4 Protocol - Type
                 memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
-                
+                                
                 // -> here print the specific part
         
                 printOutputLine(&frame);
@@ -94,22 +95,13 @@ int main(void)
                 
                 // -> here print the specific part
                 
-                printOutputLine(&frame);
+                //printOutputLine(&frame);
                 break;
             default:
                 break;
         }
-
-
-      
-
-
-        //refresh();
-    }
-    //wprintw(win, "super");
-    //endwin();
-
-    return 0;
+    }   
+        return 0;
 }
 
 //prints the out a line in the window with ethernet

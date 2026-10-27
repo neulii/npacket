@@ -26,7 +26,7 @@ enum IPV4Data
     IP_PROT_LENGTH     = 1,
     IP_SRC_OFFSET      = 12,
     IP_SRC_LENGTH      = 4,
-    IP_DST_OFFSET      = 6,
+    IP_DST_OFFSET      = 16,
     IP_DST_LENGTH      = 4
 
 };

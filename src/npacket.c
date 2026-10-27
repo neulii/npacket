@@ -79,9 +79,17 @@ int main(void)
                 
                 //IPV4 Protocol - Type
                 memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
-                                
+
+                //IPV$ Source Address 
+                memcpy(&packet->src_ip[0], &buffer[posIPV4 + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
+                //IPV$ dst Address 
+                memcpy(&packet->dst_ip[0], &buffer[posIPV4 + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
+
+
+
+
                 // -> here print the specific part
-        
+                 
                 printOutputLine(&frame);
                 break;
             
@@ -103,6 +111,7 @@ int main(void)
     }   
         return 0;
 }
+
 
 //prints the out a line in the window with ethernet
 //TODO must be changed -> just prints the same by all types
@@ -154,8 +163,25 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
         strcat(outputText, outputTemp);
     }
     
-    strcat(outputText, "\n");
+    strcat(outputText, " || ");
+    
+    //src addr 
+    for(size_t i = 0; i < IP_SRC_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%4d ", packet->src_ip[i]);
+        strcat(outputText, outputTemp);
+    }
+    
+    strcat(outputText, " || ");
+    
+    for(size_t i = 0; i < IP_DST_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%4d ", packet->dst_ip[i]);
+        strcat(outputText, outputTemp);
+    }
+    
   
+    strcat(outputText, "\n");
     //prints the finished line
     //wprintw(window,outputText, "");
     printf("%s",outputText);

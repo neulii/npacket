@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+char* buildEthernetOutput(EthernetFrame* frame);
+char* buildIPV4Output(EthernetFrame* frame);
 void printOutputLine(EthernetFrame* frame);
 
 
@@ -58,10 +60,24 @@ int main(void)
         
         uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
         
+        //build etherent output line
+ 
+        char *ethernetString = NULL;
+        ethernetString = buildEthernetOutput(&frame);
+        
+        if(ethernetString==NULL)
+        {
+            printf("error by return outputtext");
+            return 1;
+        
+        }
+
+        printf("%s",ethernetString); 
+        
+        free(ethernetString);
+
         //converts 2 bytes in one datatype for comparing in switch
         int16_t etherType = ((uint16_t)frame.type[0] << 8) | frame.type[1];
-        
-        //here printing first segment of outputline -> ehternet
 
         switch (etherType)
         {
@@ -93,12 +109,9 @@ int main(void)
                 memcpy(&packet->dst_ip[0], &buffer[posIPV4 + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
 
                 // -> here print the specific part
-                 
-                printOutputLine(&frame);
-                
+            
                 //allocated memory 
                 free(packet->identifier);
-
                 break;
             
             //if ARP Protocol 0x0806
@@ -117,8 +130,10 @@ int main(void)
             default:
                 break;
         }
+
+        printf("\n");
     }   
-        return 0;
+    return 0;
 }
 
 
@@ -192,8 +207,57 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
      
   
     strcat(outputText, "\n");
-    //prints the finished line
-    //wprintw(window,outputText, "");
     printf("%s",outputText);
 
+}
+
+char* buildEthernetOutput(EthernetFrame* frame)
+{
+    char outputText[256] = "";
+    char outputTemp[256] = "";
+
+    //size
+    sprintf(outputTemp, "%5li  ||  ", frame->size);
+    strcat(outputText, outputTemp);
+
+    //dst mac
+    for(size_t i = 0; i < ETH_DST_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%2x ", frame->dst[i]);
+        strcat(outputText, outputTemp);
+    }
+    
+    strcat(outputText, " || ");
+    
+    //src mac
+    for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%2x ", frame->src[i]);
+        strcat(outputText, outputTemp);
+    }
+    
+    strcat(outputText, " || ");
+    
+    //ethertype
+    for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%2x", frame->type[i]);
+        strcat(outputText, outputTemp);
+    }
+    char* ethernetOutput = malloc(strlen(outputText));
+
+    if(ethernetOutput == NULL)
+    {
+        printf("error by malloc!");
+        return "NULL";
+    }
+   
+    strcpy(ethernetOutput,outputText);
+
+    return ethernetOutput;
+}
+
+char* buildIPV4Output(EthernetFrame* frame)
+{
+    return NULL;
 }

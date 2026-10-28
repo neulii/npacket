@@ -12,11 +12,13 @@
 
 typedef struct
 {
+    
+    char *identifier;   //just for identifying
+    
     uint8_t protocol[2];
     uint8_t src_ip[4];
     uint8_t dst_ip[4];
     
-
 } IPV4;
 
 //describes the positions and offsets of the fields

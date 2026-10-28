@@ -26,14 +26,10 @@ int main(void)
     {
         perror("Socket Error!\n");
         return 1;
-
     }
    
     EthernetFrame frame;
     IPV4 ipv4;
-    //frame.nextLayer = &ipv4;
-
-    //textline for output
     
     bool running = true;
     
@@ -50,8 +46,7 @@ int main(void)
             return 1;
         }
         
-        
-
+    
         //Destination Mac
         memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
 
@@ -73,9 +68,21 @@ int main(void)
             //if IP Protocol 0x0800
             case 0x0800:
                 //create frame for access (because its from a void pointer)
-     
+            
                 frame.nextLayer = &ipv4;
                 IPV4 *packet= frame.nextLayer;
+
+                //set flag and getting memory 
+                char flag[] = "ipv4";
+                char *flagTemp = malloc(sizeof flag);
+                
+                if(flagTemp == NULL)
+                {
+                    return 1;
+                }
+                packet->identifier = flagTemp;
+                strcpy(packet->identifier,flag);
+
                 
                 //IPV4 Protocol - Type
                 memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
@@ -85,18 +92,20 @@ int main(void)
                 //IPV$ dst Address 
                 memcpy(&packet->dst_ip[0], &buffer[posIPV4 + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
 
-
-
-
                 // -> here print the specific part
                  
                 printOutputLine(&frame);
+                
+                //allocated memory 
+                free(packet->identifier);
+
                 break;
             
             //if ARP Protocol 0x0806
             case 0x0806:
                 //create frame for access (because its from a void pointer)
-                ARP *ARPpacket= frame.nextLayer;
+                //just code ... isnt implemented 
+                //ARP *ARPpacket= frame.nextLayer;
                 
                 //IPV4 Protocol - Type
                 //memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
@@ -118,8 +127,8 @@ int main(void)
 void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
 {
  
-    char outputText[100] = "";
-    char outputTemp[100] = "";
+    char outputText[256] = "";
+    char outputTemp[256] = "";
 
     //size
     sprintf(outputTemp, "%5li  ||  ", frame->size);
@@ -152,8 +161,6 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
     
     strcat(outputText, " || ");
 
-    
-    
     //ip 
     IPV4 *packet= frame->nextLayer;
    

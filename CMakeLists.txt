@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
-project (npacket C)
+project(npacket LANGUAGES C)
 
-#find_package(Curses REQUIRED)
-
-set (SOURCES
+set(SOURCES
     src/npacket.c
 )
 
@@ -15,12 +13,12 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -Wextra
     -pedantic
     -Werror=implicit-function-declaration
-    -g
-)
-add_custom_command(TARGET npacket POST_BUILD
-    COMMAND sudo setcap cap_net_raw,cap_net_admin=eip $<TARGET_FILE:npacket>
-    COMMENT "Setting capabilities for packet capture"
 )
 
-#target_link_libraries(${PROJECT_NAME} PRIVATE  ${CURSES_LIBRARIES})
-target_link_libraries(${PROJECT_NAME})
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND /usr/bin/sudo -n /usr/sbin/setcap
+            cap_net_raw,cap_net_admin=eip
+            "$<TARGET_FILE:${PROJECT_NAME}>"
+    COMMENT "Setting capabilities for packet capture"
+    VERBATIM
+)

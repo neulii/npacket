@@ -211,6 +211,7 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
 
 }
 
+//this function generates just the string for the ethernet
 char* buildEthernetOutput(EthernetFrame* frame)
 {
     char outputText[256] = "";

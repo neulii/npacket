@@ -14,6 +14,7 @@
 char* buildEthernetOutput(EthernetFrame* frame);
 char* buildIPV4Output(EthernetFrame* frame);
 void printOutputLine(EthernetFrame* frame);
+void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer);
 
 
 int main(void)
@@ -37,9 +38,6 @@ int main(void)
     
     while(running)
     {
-
-       //mvwprintw(title,1,1,"  size   ||        src          ||        dst         || type ||  proto");
-        
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
         
         if(frame.size < 0)
@@ -48,17 +46,8 @@ int main(void)
             return 1;
         }
         
-    
-        //Destination Mac
-        memcpy(&frame.dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame.dst[0]) * ETH_DST_LENGTH);
-
-        //Source Mac
-        memcpy(&frame.src[0], &buffer[ETH_SRC_OFFSET],sizeof (frame.src[0]) * ETH_SRC_LENGTH);
-        
-        //Ethertype
-        memcpy(&frame.type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame.type[0])*ETH_TYPE_LENGTH);
-        
-        uint8_t posIPV4 = ETH_PAYLOAD_OFFSET;
+        //parsing ethernet data from buffer to Frame
+        parseBufferToFrame(&frame, buffer);
         
         //build etherent output line
  
@@ -73,7 +62,6 @@ int main(void)
         }
 
         printf("%s",ethernetString); 
-        
         free(ethernetString);
 
         //converts 2 bytes in one datatype for comparing in switch
@@ -101,12 +89,12 @@ int main(void)
 
                 
                 //IPV4 Protocol - Type
-                memcpy(&packet->protocol[0], &buffer[posIPV4 + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
+                memcpy(&packet->protocol[0], &buffer[ETH_PAYLOAD_OFFSET + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
 
                 //IPV$ Source Address 
-                memcpy(&packet->src_ip[0], &buffer[posIPV4 + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
+                memcpy(&packet->src_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
                 //IPV$ dst Address 
-                memcpy(&packet->dst_ip[0], &buffer[posIPV4 + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
+                memcpy(&packet->dst_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
 
                 // -> here print the specific part
             
@@ -257,8 +245,22 @@ char* buildEthernetOutput(EthernetFrame* frame)
 
     return ethernetOutput;
 }
-
+//TODO 
 char* buildIPV4Output(EthernetFrame* frame)
 {
     return NULL;
+}
+
+void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
+{
+    
+ //Destination Mac
+    memcpy(&frame->dst[0], &buffer[ETH_DST_OFFSET],sizeof(frame->dst[0]) * ETH_DST_LENGTH);
+
+    //Source Mac
+    memcpy(&frame->src[0], &buffer[ETH_SRC_OFFSET],sizeof (frame->src[0]) * ETH_SRC_LENGTH);
+    
+    //Ethertype
+    memcpy(&frame->type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame->type[0])*ETH_TYPE_LENGTH);
+
 }

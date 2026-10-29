@@ -58,7 +58,6 @@ int main(void)
         {
             printf("error by return outputtext");
             return 1;
-        
         }
 
         printf("%s",ethernetString); 
@@ -78,16 +77,16 @@ int main(void)
 
                 //set flag and getting memory 
                 char flag[] = "ipv4";
-                char *flagTemp = malloc(sizeof flag);
+                //char *flagTemp = malloc(sizeof flag);
+                packet->identifier = malloc(sizeof flag);
                 
-                if(flagTemp == NULL)
+                if(packet->identifier == NULL)
                 {
                     return 1;
                 }
-                packet->identifier = flagTemp;
+
                 strcpy(packet->identifier,flag);
 
-                
                 //IPV4 Protocol - Type
                 memcpy(&packet->protocol[0], &buffer[ETH_PAYLOAD_OFFSET + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
 

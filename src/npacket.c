@@ -92,7 +92,20 @@ int main(void)
                 parseBufferToPacket(packet, buffer);
 
                 // -> here print the specific part
-            
+  
+                char *IPv4String = NULL;
+                IPv4String = buildIPv4Output(&frame);
+                
+                if(IPv4String==NULL)
+                {
+                    printf("error by return outputtext");
+                    return 1;
+                }
+
+                printf("%s",IPv4String); 
+                free(IPv4String);
+
+               
                 //allocated memory 
                 //printOutputLine(&frame);
                 free(packet->identifier);
@@ -244,6 +257,13 @@ char* buildEthernetOutput(EthernetFrame* frame)
 //TODO 
 char* buildIPv4Output(EthernetFrame* frame)
 {
+
+
+
+
+
+
+
     return NULL;
 }
 

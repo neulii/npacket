@@ -12,9 +12,10 @@
 #include "types.h"
 
 char* buildEthernetOutput(EthernetFrame* frame);
-char* buildIPV4Output(EthernetFrame* frame);
+char* buildIPv4Output(EthernetFrame* frame);
 void printOutputLine(EthernetFrame* frame);
 void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer);
+void parseBufferToPacket(IPV4* packet, uint8_t* buffer);
 
 
 int main(void)
@@ -88,16 +89,12 @@ int main(void)
                 strcpy(packet->identifier,flag);
 
                 //IPV4 Protocol - Type
-                memcpy(&packet->protocol[0], &buffer[ETH_PAYLOAD_OFFSET + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
-
-                //IPV$ Source Address 
-                memcpy(&packet->src_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
-                //IPV$ dst Address 
-                memcpy(&packet->dst_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
+                parseBufferToPacket(packet, buffer);
 
                 // -> here print the specific part
             
                 //allocated memory 
+                //printOutputLine(&frame);
                 free(packet->identifier);
                 break;
             
@@ -245,7 +242,7 @@ char* buildEthernetOutput(EthernetFrame* frame)
     return ethernetOutput;
 }
 //TODO 
-char* buildIPV4Output(EthernetFrame* frame)
+char* buildIPv4Output(EthernetFrame* frame)
 {
     return NULL;
 }
@@ -261,5 +258,21 @@ void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
     
     //Ethertype
     memcpy(&frame->type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame->type[0])*ETH_TYPE_LENGTH);
+
+}
+
+void parseBufferToPacket(IPV4* packet, uint8_t* buffer)
+{
+    //IPV4 Protocol - Type
+    memcpy(&packet->protocol[0], &buffer[ETH_PAYLOAD_OFFSET + IP_PROT_OFFSET], sizeof (packet->protocol[0]) * IP_PROT_LENGTH);
+
+    //IPV$ Source Address 
+    memcpy(&packet->src_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
+    //IPV$ dst Address 
+    memcpy(&packet->dst_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
+
+
+
+
 
 }

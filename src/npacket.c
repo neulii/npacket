@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <net/ethernet.h>
-//#include <ncurses.h>
 
 #include "types.h"
 
@@ -92,7 +91,6 @@ int main(void)
                 parseBufferToPacket(packet, buffer);
 
                 // -> here print the specific part
-  
                 char *IPv4String = NULL;
                 IPv4String = buildIPv4Output(&frame);
                 
@@ -102,13 +100,11 @@ int main(void)
                     return 1;
                 }
 
-                printf("%s",IPv4String); 
-                free(IPv4String);
-
+                printf(" || %s",IPv4String); 
                
-                //allocated memory 
-                //printOutputLine(&frame);
+                free(IPv4String);
                 free(packet->identifier);
+                
                 break;
             
             //if ARP Protocol 0x0806
@@ -134,8 +130,6 @@ int main(void)
 }
 
 
-//prints the out a line in the window with ethernet
-//TODO must be changed -> just prints the same by all types
 void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
 {
  
@@ -202,7 +196,6 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
         strcat(outputText, outputTemp);
     }
      
-  
     strcat(outputText, "\n");
     printf("%s",outputText);
 
@@ -242,6 +235,7 @@ char* buildEthernetOutput(EthernetFrame* frame)
         sprintf(outputTemp, "%2x", frame->type[i]);
         strcat(outputText, outputTemp);
     }
+    
     char* ethernetOutput = malloc(strlen(outputText));
 
     if(ethernetOutput == NULL)
@@ -254,17 +248,52 @@ char* buildEthernetOutput(EthernetFrame* frame)
 
     return ethernetOutput;
 }
-//TODO 
+
 char* buildIPv4Output(EthernetFrame* frame)
 {
+    char outputText[256] = "";
+    char outputTemp[256] = "";
 
+    //ip 
+    IPV4 *packet= frame->nextLayer;
+   
+    //Protocol
+    for(size_t i = 0; i < IP_PROT_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%2i", packet->protocol[i]);
+        strcat(outputText, outputTemp);
+    }
+    
+    strcat(outputText, " || ");
+    
+    //src addr 
+    for(size_t i = 0; i < IP_SRC_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%4d", packet->src_ip[i]);
+        strcat(outputText, outputTemp);
+    }
+    
+    strcat(outputText, " || ");
+     
+    //dst addr 
+    for(size_t i = 0; i < IP_DST_LENGTH; i++)
+    {
+        sprintf(outputTemp, "%4d", packet->dst_ip[i]);
+        //printf("%s",outputTemp); 
+        strcat(outputText, outputTemp);
+    }
+     
+    char* IPv4Output = malloc(strlen(outputText));
 
+    if(IPv4Output == NULL)
+    {
+        printf("error by malloc!");
+        return "NULL";
+    }
+   
+    strcpy(IPv4Output,outputText);
 
-
-
-
-
-    return NULL;
+    return IPv4Output;
 }
 
 void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
@@ -278,7 +307,6 @@ void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
     
     //Ethertype
     memcpy(&frame->type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame->type[0])*ETH_TYPE_LENGTH);
-
 }
 
 void parseBufferToPacket(IPV4* packet, uint8_t* buffer)
@@ -290,9 +318,5 @@ void parseBufferToPacket(IPV4* packet, uint8_t* buffer)
     memcpy(&packet->src_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_SRC_OFFSET], sizeof (packet->src_ip[0]) * IP_SRC_LENGTH);
     //IPV$ dst Address 
     memcpy(&packet->dst_ip[0], &buffer[ETH_PAYLOAD_OFFSET + IP_DST_OFFSET], sizeof (packet->dst_ip[0]) * IP_DST_LENGTH);
-
-
-
-
 
 }

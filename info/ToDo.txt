@@ -5,3 +5,4 @@
 - filter for src/dst and so on.
 
 - implement all code with pcap
+- saving packets in a array or a bigger datatype

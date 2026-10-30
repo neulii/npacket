@@ -269,7 +269,11 @@ char* buildIPv4Output(EthernetFrame* frame)
     //src addr 
     for(size_t i = 0; i < IP_SRC_LENGTH; i++)
     {
-        sprintf(outputTemp, "%4d", packet->src_ip[i]);
+        sprintf(outputTemp, "%3d", packet->src_ip[i]);
+        if(i < IP_SRC_LENGTH-1)
+        {
+            strcat(outputTemp, ".");
+        }
         strcat(outputText, outputTemp);
     }
     
@@ -278,7 +282,12 @@ char* buildIPv4Output(EthernetFrame* frame)
     //dst addr 
     for(size_t i = 0; i < IP_DST_LENGTH; i++)
     {
-        sprintf(outputTemp, "%4d", packet->dst_ip[i]);
+        sprintf(outputTemp, "%3d", packet->dst_ip[i]);
+        if(i < IP_DST_LENGTH-1)
+        {
+            strcat(outputTemp, ".");
+        }
+
         //printf("%s",outputTemp); 
         strcat(outputText, outputTemp);
     }

@@ -26,7 +26,8 @@ typedef struct
 {
     
     char *identifier;   //just for identifying
-    
+
+    uint8_t ttl[IP_TTL_LENGTH];    
     uint8_t protocol[IP_PROT_LENGTH];
     uint8_t src_ip[IP_SRC_LENGTH];
     uint8_t dst_ip[IP_DST_LENGTH];
@@ -68,13 +69,16 @@ enum EthernetData
     ETH_DST_LENGTH     = 6,
     ETH_SRC_LENGTH     = 6,
     ETH_TYPE_LENGTH    = 2
+};
 
 typedef struct
 {
     ssize_t size;
+   
     uint8_t dst[ETH_DST_LENGTH];
     uint8_t src[ETH_SRC_LENGTH];
     uint8_t type[ETH_TYPE_LENGTH];
+   
     void *nextLayer;
 
 } EthernetFrame;

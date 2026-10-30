@@ -8,11 +8,24 @@
 #include <arpa/inet.h>
 #include <net/ethernet.h>
 
+#include <time.h>
+
 #include "parsingPrinting.h"
 
 
 int main(void)
 {
+    // https://en.cppreference.com/c/chrono/timespec_get
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    char buff[100];
+    printf("%li   \n",ts.tv_nsec);
+    //strftime(buff, sizeof buff, "%D %T", gmtime(&ts.tv_sec));
+    //printf("Current time: %s.%09ld UTC\n", buff, ts.tv_nsec);     
+
+
+    return 0;
+
     int sock_raw;
     uint8_t buffer[65535];
 

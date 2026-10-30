@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include <unistd.h>
 
 
 //Layer 3

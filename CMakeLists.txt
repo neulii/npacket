@@ -4,6 +4,7 @@ project(npacket LANGUAGES C)
 
 set(SOURCES
     src/npacket.c
+    src/parsingPrinting.c
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

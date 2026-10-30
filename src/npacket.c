@@ -256,11 +256,20 @@ char* buildIPv4Output(EthernetFrame* frame)
 
     //ip 
     IPV4 *packet= frame->nextLayer;
-  
+
+    //Total Length
+    //calculate to bigger datatype -> from 2x2 bytes to 1x4 bytes
+    int16_t ip_length = ((uint16_t)packet->length[0] << 8) | packet->length[1];
+
+    sprintf(outputTemp, "%4i", ip_length);
+    strcat(outputText, outputTemp);
+
+    strcat(outputText, " || ");
+   
     //TTL
     for(size_t i = 0; i < IP_TTL_LENGTH; i++)
     {
-        sprintf(outputTemp, "%2i", packet->ttl[i]);
+        sprintf(outputTemp, "%3i", packet->ttl[i]);
         strcat(outputText, outputTemp);
     }
     
@@ -329,7 +338,10 @@ void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
 
 void parseBufferToPacket(IPV4* packet, uint8_t* buffer)
 {
-    //TTL
+    //Total Length
+    memcpy(&packet->length[0], &buffer[ETH_PAYLOAD_OFFSET + IP_LENGTH_OFFSET], sizeof (packet->length[0]) * IP_LENGTH_LENGTH);
+
+   //TTL
     memcpy(&packet->ttl[0], &buffer[ETH_PAYLOAD_OFFSET + IP_TTL_OFFSET], sizeof (packet->ttl[0]) * IP_TTL_LENGTH);
 
     //IPV4 Protocol - Type

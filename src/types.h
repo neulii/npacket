@@ -11,11 +11,13 @@
 //describes the positions and offsets of the fields
 enum IPV4Data
 {
-    IP_TTL_OFFSET      = 8, 
-    IP_PROT_OFFSET     = 9,
-    IP_SRC_OFFSET      = 12,
-    IP_DST_OFFSET      = 16,
+    IP_LENGTH_OFFSET   = 2,     //Total Length of the IP-Packet
+    IP_TTL_OFFSET      = 8,     //Time To Live 
+    IP_PROT_OFFSET     = 9,     //Protocol -> UDP/TCP
+    IP_SRC_OFFSET      = 12,    //Souce IP
+    IP_DST_OFFSET      = 16,    //Destination IP
 
+    IP_LENGTH_LENGTH   = 2,
     IP_TTL_LENGTH      = 1, 
     IP_PROT_LENGTH     = 1,
     IP_SRC_LENGTH      = 4,
@@ -26,7 +28,7 @@ typedef struct
 {
     
     char *identifier;   //just for identifying
-
+    uint8_t length[IP_LENGTH_LENGTH];
     uint8_t ttl[IP_TTL_LENGTH];    
     uint8_t protocol[IP_PROT_LENGTH];
     uint8_t src_ip[IP_SRC_LENGTH];

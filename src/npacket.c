@@ -50,7 +50,6 @@ int main(void)
         parseBufferToFrame(&frame, buffer);
         
         //build etherent output line
- 
         char *ethernetString = NULL;
         ethernetString = buildEthernetOutput(&frame);
         
@@ -71,7 +70,6 @@ int main(void)
             //if IP Protocol 0x0800
             case 0x0800:
                 //create frame for access (because its from a void pointer)
-            
                 frame.nextLayer = &ipv4;
                 IPV4 *packet= frame.nextLayer;
 
@@ -87,10 +85,10 @@ int main(void)
 
                 strcpy(packet->identifier,flag);
 
-                //IPV4 Protocol - Type
+                //parsing data to packet type
                 parseBufferToPacket(packet, buffer);
 
-                // -> here print the specific part
+                //print ipv4 specific part
                 char *IPv4String = NULL;
                 IPv4String = buildIPv4Output(&frame);
                 
@@ -101,7 +99,8 @@ int main(void)
                 }
 
                 printf(" || %s",IPv4String); 
-               
+              
+                //cleanup
                 free(IPv4String);
                 free(packet->identifier);
                 
@@ -202,6 +201,7 @@ void printOutputLine(EthernetFrame* frame/*, WINDOW* window*/)
 }
 
 //this function generates just the string for the ethernet
+// ================       LEGACY    ===================
 char* buildEthernetOutput(EthernetFrame* frame)
 {
     char outputText[256] = "";

@@ -50,12 +50,12 @@ char* buildEthernetOutput(EthernetFrame* frame)
         strcat(outputText, outputTemp);
     }
     
-    char* ethernetOutput = malloc(strlen(outputText));
+    char* ethernetOutput = malloc(strlen(outputText) + 1);
 
     if(ethernetOutput == NULL)
     {
         printf("error by malloc!");
-        return "NULL";
+        return NULL;
     }
    
     strcpy(ethernetOutput,outputText);
@@ -195,12 +195,12 @@ char* buildIPv4Output(EthernetFrame* frame)
         strcat(outputText, outputTemp);
     }
      
-    char* IPv4Output = malloc(strlen(outputText));
+    char* IPv4Output = malloc(strlen(outputText) + 1);
 
     if(IPv4Output == NULL)
     {
         printf("error by malloc!");
-        return "NULL";
+        return NULL;
     }
    
     strcpy(IPv4Output,outputText);

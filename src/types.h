@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <time.h>
 
 
 //Layer 3
@@ -77,6 +78,8 @@ enum EthernetData
 typedef struct
 {
     ssize_t size;
+    struct timespec timestamp;
+    long frameNr;
    
     uint8_t dst[ETH_DST_LENGTH];
     uint8_t src[ETH_SRC_LENGTH];

@@ -15,16 +15,6 @@
 
 int main(void)
 {
-    // https://en.cppreference.com/c/chrono/timespec_get
-    struct timespec ts;
-    timespec_get(&ts, TIME_UTC);
-    char buff[100];
-    printf("%li   \n",ts.tv_nsec);
-    //strftime(buff, sizeof buff, "%D %T", gmtime(&ts.tv_sec));
-    //printf("Current time: %s.%09ld UTC\n", buff, ts.tv_nsec);     
-
-
-    return 0;
 
     int sock_raw;
     uint8_t buffer[65535];
@@ -43,10 +33,26 @@ int main(void)
     
     bool running = true;
     
+    //starting Time
+    struct timespec startCapturing;
+    struct timespec timeStampFrame;
+
+    //get Time when capturing starts
+    clock_gettime(CLOCK_REALTIME, &startCapturing);
+
+    //counter
+    long frameCounter = 0;
+
     while(running)
     {
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+
+        //save timestamp
+        clock_gettime(CLOCK_REALTIME, &timeStampFrame);
         
+        frame.timestamp.tv_sec = timeStampFrame.tv_sec - startCapturing.tv_sec;
+        frame.timestamp.tv_nsec = timeStampFrame.tv_nsec - startCapturing.tv_nsec;
+
         if(frame.size < 0)
         {
             perror("Error when Reading Data...\n");
@@ -55,6 +61,9 @@ int main(void)
         
         //parsing ethernet data from buffer to Frame
         parseBufferToFrame(&frame, buffer);
+
+        frame.frameNr = frameCounter;
+        frameCounter++;
         
         //build etherent output line
         char *ethernetString = NULL;

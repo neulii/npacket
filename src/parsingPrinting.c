@@ -6,6 +6,21 @@ char* buildEthernetOutput(EthernetFrame* frame)
     char outputText[256] = "";
     char outputTemp[256] = "";
 
+    //Framecounter
+
+    sprintf(outputTemp, "%4ld", frame->frameNr);
+    strcat(outputText, outputTemp); 
+
+    strcat(outputText, " || ");
+
+    //TimeStamp
+    double timest = frame->timestamp.tv_sec + frame->timestamp.tv_nsec/1000000000.0;
+
+    sprintf(outputTemp, "%5.5f", timest);
+    strcat(outputText, outputTemp);
+
+    strcat(outputText, " || ");
+
     //size
     sprintf(outputTemp, "%5li  ||  ", frame->size);
     strcat(outputText, outputTemp);

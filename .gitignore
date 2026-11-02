@@ -3,3 +3,4 @@ npacket
 build/
 .directory
 tags
+debug/

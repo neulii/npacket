@@ -28,7 +28,7 @@ char* buildEthernetOutput(EthernetFrame* frame)
     //dst mac
     for(size_t i = 0; i < ETH_DST_LENGTH; i++)
     {
-        sprintf(outputTemp, "%2x ", frame->dst[i]);
+        sprintf(outputTemp, "%02x ", frame->dst[i]);
         strcat(outputText, outputTemp);
     }
     
@@ -37,7 +37,7 @@ char* buildEthernetOutput(EthernetFrame* frame)
     //src mac
     for(size_t i = 0; i < ETH_SRC_LENGTH; i++)
     {
-        sprintf(outputTemp, "%2x ", frame->src[i]);
+        sprintf(outputTemp, "%02x ", frame->src[i]);
         strcat(outputText, outputTemp);
     }
     
@@ -46,7 +46,7 @@ char* buildEthernetOutput(EthernetFrame* frame)
     //ethertype
     for(size_t i = 0; i < ETH_TYPE_LENGTH; i++)
     {
-        sprintf(outputTemp, "%2x", frame->type[i]);
+        sprintf(outputTemp, "%02x", frame->type[i]);
         strcat(outputText, outputTemp);
     }
     

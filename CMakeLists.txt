@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(npacket LANGUAGES C)
 
+find_package(Curses REQUIRED)
+
 set(SOURCES
     src/npacket.c
     src/parsingPrinting.c
@@ -23,3 +25,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Setting capabilities for packet capture"
     VERBATIM
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE  ${CURSES_LIBRARIES})

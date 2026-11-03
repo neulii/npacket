@@ -1,6 +1,5 @@
 - save capture files
 - open capture files
-- add timestamp
 
 - filter for src/dst and so on.
 
@@ -9,3 +8,10 @@
 
 - check framelength -> is the frame plausible -> then the frame have to be parsed
 - sprintf -> use snprintf in future -> dont writes after the buffersize
+
+- TUI
+- Unit Tests
+===========       DONE     ==========================
+
+
+- add timestamp

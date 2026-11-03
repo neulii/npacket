@@ -7,14 +7,27 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <net/ethernet.h>
+#include <ncurses.h>
 
 #include <time.h>
 
 #include "parsingPrinting.h"
 
+#define NCURSES 
 
 int main(void)
 {
+
+    #ifdef NCURSES 
+        initscr();
+        scrollok(stdscr, true);
+
+        //printw("toll %s", "stefan");
+
+    #endif
+    //mvprintw(0,10,"hallo");
+    //mvprintw(2,10,"stefan");
+
 
     int sock_raw;
     uint8_t buffer[65535];
@@ -75,7 +88,15 @@ int main(void)
             return 1;
         }
 
-        printf("%s",ethernetString); 
+                #ifdef NCURSES
+                
+                   printw("%s",ethernetString); 
+                #else
+
+                    printf("%s",ethernetString); 
+                #endif 
+                
+
         free(ethernetString);
 
         //converts 2 bytes in one datatype for comparing in switch
@@ -114,9 +135,13 @@ int main(void)
                     return 1;
                 }
 
-                printf(" || %s",IPv4String); 
-              
-                //cleanup
+                #ifdef NCURSES
+                    printw(" || %s",IPv4String); 
+                #else
+                    printf(" || %s",IPv4String); 
+                #endif 
+                
+                    //cleanup
                 free(IPv4String);
                 free(packet->identifier);
                 
@@ -137,10 +162,37 @@ int main(void)
                 break;
             default:
                 break;
-        }
 
-        printf("\n");
+        #ifdef NCURSES
+
+            refresh();          // writes the windows
+            getch();            //waits for input
+
+        #endif
+
+        }
+        #ifdef NCURSES
+            printw("\n"); 
+            refresh();          // writes the windows
+        #else 
+            printf("\n");
+        #endif 
+        
+
+    //getch();            //waits for input
+    
     }   
+    
+
+
+    #ifdef NCURSES
+
+   endwin();           //ends window
+
+    #endif
+
+
+
     return 0;
 }
 

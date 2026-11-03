@@ -20,8 +20,10 @@ int main(void)
 
     #ifdef NCURSES 
         initscr();
+        
+        cbreak(); 
         scrollok(stdscr, true);
-
+        timeout(10);
         //printw("toll %s", "stefan");
 
     #endif
@@ -55,9 +57,18 @@ int main(void)
 
     //counter
     long frameCounter = 0;
+    
+    int ch;
 
     while(running)
     {
+        ch = getch();		
+        
+        if(ch == 'q')
+        {
+            break;
+        }
+        
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
 
         //save timestamp
@@ -163,12 +174,12 @@ int main(void)
             default:
                 break;
 
-        #ifdef NCURSES
+            #ifdef NCURSES
 
-            refresh();          // writes the windows
-            getch();            //waits for input
+                //refresh();          // writes the windows
+                //getch();            //waits for input
 
-        #endif
+            #endif
 
         }
         #ifdef NCURSES
@@ -187,7 +198,8 @@ int main(void)
 
     #ifdef NCURSES
 
-   endwin();           //ends window
+    endwin();           //ends window
+    //nocbreak();
 
     #endif
 

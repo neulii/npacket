@@ -13,13 +13,26 @@
 //describes the positions and offsets of the fields
 enum IPV4Data
 {
+    
+    IP_VERSION_OFFSET  = 0,     //Bit 0-4
+    IP_IHL_OFFSET      = 0,     //Bit 5-8
+    IP_TOS_OFFSET      = 1,
     IP_LENGTH_OFFSET   = 2,     //Total Length of the IP-Packet
+    IP_ID_OFFSET       = 4, 
+    IP_FLAGS_OFFSET    = 0,     //Bit 48-51 
     IP_TTL_OFFSET      = 8,     //Time To Live 
+    IP_FRAGMENT_OFFSET = 0,     //Bit 51-64
     IP_PROT_OFFSET     = 9,     //Protocol -> UDP/TCP
     IP_SRC_OFFSET      = 12,    //Souce IP
     IP_DST_OFFSET      = 16,    //Destination IP
-
-    IP_LENGTH_LENGTH   = 2,
+    
+    IP_VERSION_LENGTH  = 0,     //4 Bit 
+    IP_IHL_LENGTH      = 0,     //4 Bit
+    IP_TOS_LENGTH      = 1,     
+    IP_LENGTH_LENGTH   = 2,     
+    IP_ID_LENGTH       = 1,
+    IP_FLAGS_LENGTH    = 0,     //3  Bits
+    IP_FRAGMENT_LENGTH = 0,     //12 Bits
     IP_TTL_LENGTH      = 1, 
     IP_PROT_LENGTH     = 1,
     IP_SRC_LENGTH      = 4,

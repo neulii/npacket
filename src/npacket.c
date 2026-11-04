@@ -13,10 +13,25 @@
 
 #include "parsingPrinting.h"
 
-#define NCURSES 
+//#define NCURSES 
 
-int main(void)
+int main(int argc, const char* argv[])
 {
+    //check program parameters
+    if(argc>1)
+    {
+        printf("parameter have to be processed: %i\n", argc);    
+        for(size_t i; i < argc; i++)
+        {
+            printf("%i: %s\n", i, argv[i]);
+
+        }
+
+    }
+
+
+
+
 
     #ifdef NCURSES 
         initscr();
@@ -30,7 +45,8 @@ int main(void)
     //mvprintw(0,10,"hallo");
     //mvprintw(2,10,"stefan");
 
-
+    return 0;
+    
     int sock_raw;
     uint8_t buffer[65535];
 
@@ -66,7 +82,8 @@ int main(void)
         
         if(ch == 'q')
         {
-            break;
+            //break;
+            running = false;
         }
         
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);

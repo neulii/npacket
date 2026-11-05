@@ -15,38 +15,52 @@
 
 //#define NCURSES 
 
+
+enum gMode
+{
+    MODE_NCURSES,
+    MODE_CLI
+};
+
+
+
+
 int main(int argc, const char* argv[])
 {
+
+    enum gMode mode;
+
     //check program parameters
     if(argc>1)
     {
-        printf("parameter have to be processed: %i\n", argc);    
-        for(size_t i; i < argc; i++)
+        //printf("parameters: %i\n",argc);
+        
+        //printf("argument 1 %s\n", argv[1]); 
+        if(strcmp(argv[1],"-cli") == 0)
         {
-            printf("%i: %s\n", i, argv[i]);
-
+            mode = MODE_CLI;
+            printf("mode cli is set!\n");
         }
-
+        else
+        {
+            printf("parameter not found!\n");
+            return 1;
+        }
+    }
+    else
+    {
+        mode = MODE_NCURSES;
+        printf("mode ncurses is set!\n");
     }
 
-
-
-
-
-    #ifdef NCURSES 
+    if(mode == MODE_NCURSES)
+    {
         initscr();
-        
         cbreak(); 
         scrollok(stdscr, true);
         timeout(10);
-        //printw("toll %s", "stefan");
+    }
 
-    #endif
-    //mvprintw(0,10,"hallo");
-    //mvprintw(2,10,"stefan");
-
-    return 0;
-    
     int sock_raw;
     uint8_t buffer[65535];
 
@@ -116,14 +130,14 @@ int main(int argc, const char* argv[])
             return 1;
         }
 
-                #ifdef NCURSES
-                
-                   printw("%s",ethernetString); 
-                #else
-
-                    printf("%s",ethernetString); 
-                #endif 
-                
+        if(mode == MODE_NCURSES)
+        {
+            printw("%s",ethernetString); 
+        }
+        else
+        {   
+            printf("%s",ethernetString); 
+        } 
 
         free(ethernetString);
 
@@ -163,12 +177,14 @@ int main(int argc, const char* argv[])
                     return 1;
                 }
 
-                #ifdef NCURSES
+                if(mode == MODE_NCURSES)
+                {
                     printw(" || %s",IPv4String); 
-                #else
+                }
+                else
+                {
                     printf(" || %s",IPv4String); 
-                #endif 
-                
+                } 
                     //cleanup
                 free(IPv4String);
                 free(packet->identifier);
@@ -190,37 +206,23 @@ int main(int argc, const char* argv[])
                 break;
             default:
                 break;
-
-            #ifdef NCURSES
-
-                //refresh();          // writes the windows
-                //getch();            //waits for input
-
-            #endif
-
         }
-        #ifdef NCURSES
+        
+        if(mode == MODE_NCURSES)
+        {
             printw("\n"); 
             refresh();          // writes the windows
-        #else 
+        } 
+        else 
+        {
             printf("\n");
-        #endif 
-        
-
-    //getch();            //waits for input
-    
+        } 
     }   
     
-
-
-    #ifdef NCURSES
-
-    endwin();           //ends window
-    //nocbreak();
-
-    #endif
-
-
+    if(mode == MODE_NCURSES)
+    {
+        endwin();           //ends window
+    }
 
     return 0;
 }

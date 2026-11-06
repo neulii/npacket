@@ -70,11 +70,8 @@ int main(int argc, const char* argv[])
     int height = 70;
 
     WINDOW *windowFrame = newwin(height, width, windowY, windowX);
-    if(mode == MODE_NCURSES)
-    {
-        box(windowFrame, 0,0);
-        wrefresh(windowFrame);
-    }
+    //box(windowFrame, 0,0);
+    //wrefresh(windowFrame);
 
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
     scrollok(windowText, TRUE);
@@ -152,15 +149,8 @@ int main(int argc, const char* argv[])
             return 1;
         }
 
-        if(mode == MODE_NCURSES)
-        {
-            wprintw(windowText, "%s",ethernetString); 
-        }
-        else
-        {   
-            printf("%s",ethernetString); 
-        } 
-
+        wprintw(windowText, "%s",ethernetString); 
+        
         free(ethernetString);
 
         //converts 2 bytes in one datatype for comparing in switch
@@ -199,15 +189,9 @@ int main(int argc, const char* argv[])
                     return 1;
                 }
 
-                if(mode == MODE_NCURSES)
-                {
-                    wprintw(windowText, " || %s",IPv4String); 
-                }
-                else
-                {
-                    printf(" || %s",IPv4String); 
-                } 
-                    //cleanup
+                wprintw(windowText, " || %s",IPv4String); 
+                
+                //cleanup
                 free(IPv4String);
                 free(packet->identifier);
                 
@@ -230,27 +214,19 @@ int main(int argc, const char* argv[])
                 break;
         }
         
-        if(mode == MODE_NCURSES)
-        {
-           
-            wprintw(windowText, "\n"); 
-            box(windowFrame, 0,0);
-            wrefresh(windowFrame);
-            wrefresh(windowText);
-            
-            refresh();          // writes the windows
-        } 
-        else 
-        {
-            printf("\n");
-        } 
+          
+        wprintw(windowText, "\n"); 
+        
+        box(windowFrame, 0,0);
+        wrefresh(windowFrame);
+        wrefresh(windowText);
+        
+        refresh();          // writes the windows
+    
     }   
     
-    if(mode == MODE_NCURSES)
-    {
-        endwin();           //ends window
-    }
-
+    endwin();           //ends window
+    
     return 0;
 }
 

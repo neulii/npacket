@@ -52,20 +52,45 @@ int main(int argc, const char* argv[])
         mode = MODE_NCURSES;
         printf("mode ncurses is set!\n");
     }
+    
+    //TODO make ncurses global
+    initscr();
+    //cbreak();
+    noecho();
+    curs_set(0);
+    //scrollok(stdscr, true);
 
-    if(mode == MODE_NCURSES)
+    if(has_colors() == FALSE)
     {
-        initscr();
-        cbreak(); 
-        scrollok(stdscr, true);
+        endwin();
+        printf("your Terminal does not support colors!!");
+        return 1;
     }
+
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+
+    int windowX = 5;
+    int windowY = 2;
+    int width = 250;
+    int height = 70;
+
+    WINDOW *windowFrame = newwin(height, width, windowY, windowX);
+    box(windowFrame, 0,0);
+    wrefresh(windowFrame);
+
+    WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
+    scrollok(windowText, TRUE);
+
+
+
+
 
     int sock_raw;
     uint8_t buffer[65535];
 
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
-    timeout(1);
+    //timeout(1);
 
     //exit when error by opening the socket
     if(sock_raw < 0)
@@ -89,20 +114,20 @@ int main(int argc, const char* argv[])
     //counter
     long frameCounter = 0;
     
-    int ch;
+    //int ch;
 
     while(running)
     {
-        
-        //timeout(1);
-        //ch = getch();		
+        /*
+        timeout(1);
+        ch = getch();		
         if(ch == 'q')
         {
             //break;
             running = false;
             endwin();
         }
-        
+        */ 
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
 
         //save timestamp
@@ -135,7 +160,7 @@ int main(int argc, const char* argv[])
 
         if(mode == MODE_NCURSES)
         {
-            printw("%s",ethernetString); 
+            wprintw(windowText, "%s",ethernetString); 
         }
         else
         {   
@@ -182,7 +207,7 @@ int main(int argc, const char* argv[])
 
                 if(mode == MODE_NCURSES)
                 {
-                    printw(" || %s",IPv4String); 
+                    wprintw(windowText, " || %s",IPv4String); 
                 }
                 else
                 {
@@ -213,7 +238,12 @@ int main(int argc, const char* argv[])
         
         if(mode == MODE_NCURSES)
         {
-            printw("\n"); 
+           
+            wprintw(windowText, "\n"); 
+            box(windowFrame, 0,0);
+            wrefresh(windowFrame);
+            wrefresh(windowText);
+            
             refresh();          // writes the windows
         } 
         else 

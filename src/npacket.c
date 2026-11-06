@@ -15,15 +15,11 @@
 
 //#define NCURSES 
 
-
 enum gMode
 {
     MODE_NCURSES,
     MODE_CLI
 };
-
-
-
 
 int main(int argc, const char* argv[])
 {
@@ -55,7 +51,6 @@ int main(int argc, const char* argv[])
     
     //TODO make ncurses global
     initscr();
-    //cbreak();
     noecho();
     curs_set(0);
     //scrollok(stdscr, true);
@@ -75,15 +70,14 @@ int main(int argc, const char* argv[])
     int height = 70;
 
     WINDOW *windowFrame = newwin(height, width, windowY, windowX);
-    box(windowFrame, 0,0);
-    wrefresh(windowFrame);
+    if(mode == MODE_NCURSES)
+    {
+        box(windowFrame, 0,0);
+        wrefresh(windowFrame);
+    }
 
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
     scrollok(windowText, TRUE);
-
-
-
-
 
     int sock_raw;
     uint8_t buffer[65535];
@@ -138,7 +132,7 @@ int main(int argc, const char* argv[])
 
         if(frame.size < 0)
         {
-            perror("Error when Reading Data...\n");
+            perror("Error when Reading Data...");
             return 1;
         }
         

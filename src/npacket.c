@@ -58,13 +58,14 @@ int main(int argc, const char* argv[])
         initscr();
         cbreak(); 
         scrollok(stdscr, true);
-        timeout(10);
     }
 
     int sock_raw;
     uint8_t buffer[65535];
 
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+
+    timeout(1);
 
     //exit when error by opening the socket
     if(sock_raw < 0)
@@ -92,12 +93,14 @@ int main(int argc, const char* argv[])
 
     while(running)
     {
-        ch = getch();		
         
+        //timeout(1);
+        //ch = getch();		
         if(ch == 'q')
         {
             //break;
             running = false;
+            endwin();
         }
         
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);

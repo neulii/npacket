@@ -23,9 +23,6 @@ enum gMode
 
 int main(int argc, const char* argv[])
 {
-
-    enum gMode mode;
-
     //check program parameters
     if(argc>1)
     {
@@ -34,8 +31,7 @@ int main(int argc, const char* argv[])
         //printf("argument 1 %s\n", argv[1]); 
         if(strcmp(argv[1],"-cli") == 0)
         {
-            mode = MODE_CLI;
-            printf("mode cli is set!\n");
+            //printf("mode cli is set!\n");
         }
         else
         {
@@ -45,7 +41,6 @@ int main(int argc, const char* argv[])
     }
     else
     {
-        mode = MODE_NCURSES;
         printf("mode ncurses is set!\n");
     }
     
@@ -61,13 +56,22 @@ int main(int argc, const char* argv[])
         printf("your Terminal does not support colors!!");
         return 1;
     }
+    start_color();
 
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(1, COLOR_WHITE, COLOR_BLUE);
+    init_pair(2, COLOR_WHITE, COLOR_BLACK);
 
-    int windowX = 5;
+    int terminalX = COLS;
+    int terminalY = LINES;
+
+
+    int windowX = 2;
     int windowY = 2;
-    int width = 250;
-    int height = 70;
+    int width = terminalX-4;
+    int height = terminalY-5;
+    //int height = 20;
+
+    int cursorLine = 0;
 
     WINDOW *windowFrame = newwin(height, width, windowY, windowX);
     //box(windowFrame, 0,0);
@@ -75,6 +79,8 @@ int main(int argc, const char* argv[])
 
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
     scrollok(windowText, TRUE);
+
+    keypad(stdscr   , TRUE);
 
     int sock_raw;
     uint8_t buffer[65535];
@@ -105,11 +111,11 @@ int main(int argc, const char* argv[])
     //counter
     long frameCounter = 0;
     
-    //int ch;
+    int ch;
 
     while(running)
     {
-        /*
+        
         timeout(1);
         ch = getch();		
         if(ch == 'q')
@@ -118,7 +124,17 @@ int main(int argc, const char* argv[])
             running = false;
             endwin();
         }
-        */ 
+        if(ch == KEY_UP)
+        {
+            init_pair(1, COLOR_WHITE, COLOR_BLUE);
+        }
+        if(ch == KEY_DOWN)
+        {
+           init_pair(1, COLOR_WHITE, COLOR_YELLOW);
+        }
+        
+        
+
         frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
 
         //save timestamp
@@ -214,15 +230,27 @@ int main(int argc, const char* argv[])
                 break;
         }
         
-          
         wprintw(windowText, "\n"); 
+
+
+        int x = getcurx(windowText);
+        int y = getcury(windowText);
+
+
+        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
+        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
         
+        wmove(windowText,y,0);
+       
         box(windowFrame, 0,0);
+        
         wrefresh(windowFrame);
         wrefresh(windowText);
         
+        
+        
         refresh();          // writes the windows
-    
+        
     }   
     
     endwin();           //ends window

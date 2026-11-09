@@ -48,7 +48,6 @@ int main(int argc, const char* argv[])
     initscr();
     noecho();
     curs_set(0);
-    //scrollok(stdscr, true);
 
     if(has_colors() == FALSE)
     {
@@ -64,12 +63,11 @@ int main(int argc, const char* argv[])
     int terminalX = COLS;
     int terminalY = LINES;
 
-
     int windowX = 2;
     int windowY = 2;
     int width = terminalX-4;
     int height = terminalY-5;
-    //int height = 20;
+    //int height = 20; //test height
 
     int cursorLine = 0;
 
@@ -80,14 +78,12 @@ int main(int argc, const char* argv[])
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
     scrollok(windowText, TRUE);
 
-    keypad(stdscr   , TRUE);
+    keypad(stdscr, TRUE);       //for special keys
 
     int sock_raw;
     uint8_t buffer[65535];
 
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-
-    //timeout(1);
 
     //exit when error by opening the socket
     if(sock_raw < 0)
@@ -115,9 +111,8 @@ int main(int argc, const char* argv[])
 
     while(running)
     {
-        
-        timeout(1);
-        ch = getch();		
+        // timeout(1);
+        // ch = getch();		
         if(ch == 'q')
         {
             //break;

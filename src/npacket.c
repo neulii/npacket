@@ -1,19 +1,13 @@
-#include <netinet/in.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdbool.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <net/ethernet.h>
 #include <ncurses.h>
-
+#include <pcap.h>
 #include <time.h>
 
 #include "parsingPrinting.h"
-
-//#define NCURSES 
 
 enum gMode
 {
@@ -21,27 +15,50 @@ enum gMode
     MODE_CLI
 };
 
+char selInterf[50];
+
 int main(int argc, const char* argv[])
 {
+    pcap_if_t* alldevs;
+    pcap_if_t *dev;
+    char errbuf[PCAP_ERRBUF_SIZE];
+    //int userInput = 0;
+    
+    //when interface detection fails
+    if (pcap_findalldevs(&alldevs, errbuf) != 0) {
+        printf("%s\n", errbuf);
+        return 1;
+
+    }   
+    int i = 0;
+
     //check program parameters
     if(argc>1)
     {
-        //printf("parameters: %i\n",argc);
-        
-        //printf("argument 1 %s\n", argv[1]); 
-        if(strcmp(argv[1],"-cli") == 0)
-        {
-            //printf("mode cli is set!\n");
-        }
-        else
-        {
-            printf("parameter not found!\n");
-            return 1;
-        }
+       //printf("%s\n", argv[1]);
+       strcpy(selInterf, argv[1]);
+       printf("%s\n", selInterf);
+
     }
     else
+
     {
-        printf("mode ncurses is set!\n");
+        printf("usage: npacket [interfacename]\n");
+        for (dev = alldevs; dev != NULL; dev = dev->next) 
+        {
+            printf("[%d] %s  //  ", i, dev->name);
+
+            if (dev->description != NULL) 
+            {
+                printf("%s\n", dev->description);
+            } 
+            else 
+            {
+                printf("\n");
+            }
+            i++;
+        }
+        return 0;
     }
     
     //TODO make ncurses global
@@ -80,18 +97,34 @@ int main(int argc, const char* argv[])
 
     keypad(stdscr, TRUE);       //for special keys
 
-    int sock_raw;
-    uint8_t buffer[65535];
+    //int sock_raw;
+    //uint8_t buffer[65535];
+    const unsigned char *buffer;
 
-    sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    //sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
     //exit when error by opening the socket
-    if(sock_raw < 0)
+    // if(sock_raw < 0)
+    // {
+    //     perror("Socket Error!\n");
+    //     return 1;
+    // }
+    pcap_t *handle = pcap_open_live(    selInterf, // interfaceName
+        65535, // bufferSize
+        1,     // promiscouse Mode=1
+        1,  // timeout
+        errbuf
+    );
+  
+    
+    if (handle == NULL)
     {
-        perror("Socket Error!\n");
+        printf("Fehler: %s\n", errbuf);
         return 1;
     }
-   
+
+    struct pcap_pkthdr *header;
+
     EthernetFrame frame;
     IPV4 ipv4;
     
@@ -128,9 +161,9 @@ int main(int argc, const char* argv[])
            init_pair(1, COLOR_WHITE, COLOR_YELLOW);
         }
         
-        
+        int result = pcap_next_ex(handle, &header, &buffer);
 
-        frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
+        //frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
 
         //save timestamp
         clock_gettime(CLOCK_REALTIME, &timeStampFrame);
@@ -138,13 +171,14 @@ int main(int argc, const char* argv[])
         frame.timestamp.tv_sec = timeStampFrame.tv_sec - startCapturing.tv_sec;
         frame.timestamp.tv_nsec = timeStampFrame.tv_nsec - startCapturing.tv_nsec;
 
-        if(frame.size < 0)
+        if(result!=1)
         {
             perror("Error when Reading Data...");
             return 1;
         }
         
         //parsing ethernet data from buffer to Frame
+        //TODO
         parseBufferToFrame(&frame, buffer);
 
         frame.frameNr = frameCounter;
@@ -227,10 +261,8 @@ int main(int argc, const char* argv[])
         
         wprintw(windowText, "\n"); 
 
-
-        int x = getcurx(windowText);
+        //int x = getcurx(windowText);
         int y = getcury(windowText);
-
 
         mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
         mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
@@ -242,14 +274,10 @@ int main(int argc, const char* argv[])
         wrefresh(windowFrame);
         wrefresh(windowText);
         
-        
-        
         refresh();          // writes the windows
-        
     }   
     
     endwin();           //ends window
     
     return 0;
 }
-

@@ -9,14 +9,14 @@ set(SOURCES
     src/parsingPrinting.c
 )
 
+find_library(PCAP_LIBRARY
+        NAMES pcap
+        PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
+)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -Wall
-    -Wextra
-    -pedantic
-    -Werror=implicit-function-declaration
-)
+
+
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND /usr/bin/sudo -n /usr/sbin/setcap
@@ -26,4 +26,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     VERBATIM
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE  ${CURSES_LIBRARIES})
+target_compile_options(${PROJECT_NAME} PRIVATE
+    -Wall
+    -Wextra
+    -pedantic
+    -Werror=implicit-function-declaration
+)
+
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CURSES_LIBRARIES} ${PCAP_LIBRARY})

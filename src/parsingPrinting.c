@@ -208,7 +208,7 @@ char* buildIPv4Output(EthernetFrame* frame)
     return IPv4Output;
 }
 
-void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
+void parseBufferToFrame(EthernetFrame* frame, const uint8_t* buffer)
 {
     
  //Destination Mac
@@ -221,7 +221,7 @@ void parseBufferToFrame(EthernetFrame* frame, uint8_t* buffer)
     memcpy(&frame->type[0], &buffer[ETH_TYPE_OFFSET],sizeof (frame->type[0])*ETH_TYPE_LENGTH);
 }
 
-void parseBufferToPacket(IPV4* packet, uint8_t* buffer)
+void parseBufferToPacket(IPV4* packet, const uint8_t* buffer)
 {
     //Total Length
     memcpy(&packet->length[0], &buffer[ETH_PAYLOAD_OFFSET + IP_LENGTH_OFFSET], sizeof (packet->length[0]) * IP_LENGTH_LENGTH);

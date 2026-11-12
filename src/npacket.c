@@ -9,44 +9,35 @@
 
 #include "parsingPrinting.h"
 
-enum gMode
-{
-    MODE_NCURSES,
-    MODE_CLI
-};
-
 char selInterf[50];
 
 int main(int argc, const char* argv[])
 {
-    pcap_if_t* alldevs;
-    pcap_if_t *dev;
-    char errbuf[PCAP_ERRBUF_SIZE];
-    //int userInput = 0;
+    pcap_if_t* alldevs;                 //all interfaces 
+    pcap_if_t *dev;                     //interface for working with
+    char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
     
     //when interface detection fails
     if (pcap_findalldevs(&alldevs, errbuf) != 0) {
         printf("%s\n", errbuf);
         return 1;
-
     }   
-    int i = 0;
 
     //check program parameters
     if(argc>1)
     {
-       //printf("%s\n", argv[1]);
-       strcpy(selInterf, argv[1]);
-       printf("%s\n", selInterf);
-
+        //printf("%s\n", argv[1]);
+        strcpy(selInterf, argv[1]);
+        printf("%s\n", selInterf);
+        
     }
-    else
-
+    else            //when no cli parameters list all interfaces
+    
     {
         printf("usage: npacket [interfacename]\n");
         for (dev = alldevs; dev != NULL; dev = dev->next) 
         {
-            printf("[%d] %s  //  ", i, dev->name);
+            printf("%s  //  ", dev->name);
 
             if (dev->description != NULL) 
             {
@@ -56,12 +47,11 @@ int main(int argc, const char* argv[])
             {
                 printf("\n");
             }
-            i++;
         }
         return 0;
     }
     
-    //TODO make ncurses global
+    
     initscr();
     noecho();
     curs_set(0);
@@ -89,26 +79,15 @@ int main(int argc, const char* argv[])
     int cursorLine = 0;
 
     WINDOW *windowFrame = newwin(height, width, windowY, windowX);
-    //box(windowFrame, 0,0);
-    //wrefresh(windowFrame);
-
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
+
     scrollok(windowText, TRUE);
 
-    keypad(stdscr, TRUE);       //for special keys
+    keypad(stdscr, TRUE);           //for special keys
 
-    //int sock_raw;
-    //uint8_t buffer[65535];
-    const unsigned char *buffer;
+    const unsigned char *buffer;    //buffer for getting data from NIC
 
-    //sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-
-    //exit when error by opening the socket
-    // if(sock_raw < 0)
-    // {
-    //     perror("Socket Error!\n");
-    //     return 1;
-    // }
+    //create pcap handle
     pcap_t *handle = pcap_open_live(    selInterf, // interfaceName
         65535, // bufferSize
         1,     // promiscouse Mode=1
@@ -116,7 +95,6 @@ int main(int argc, const char* argv[])
         errbuf
     );
   
-    
     if (handle == NULL)
     {
         printf("Fehler: %s\n", errbuf);
@@ -164,7 +142,8 @@ int main(int argc, const char* argv[])
         int result = pcap_next_ex(handle, &header, &buffer);
 
         //frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
-
+        frame.size = header->len;
+        
         //save timestamp
         clock_gettime(CLOCK_REALTIME, &timeStampFrame);
         

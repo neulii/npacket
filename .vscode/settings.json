@@ -7,6 +7,6 @@
         "MIMode": "gdb",
         "miDebuggerPath": "/usr/local/bin/gdb-root",
         "externalConsole": false,
-        "args": ["ens18"]
-    }
+        "args": ["eno1"]
+    },
 }

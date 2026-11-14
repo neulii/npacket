@@ -13,8 +13,8 @@ char selInterf[50];
 
 int main(int argc, const char* argv[])
 {
-    pcap_if_t *alldevs;                 //all interfaces 
-    pcap_if_t *dev;                     //interface for working with
+    pcap_if_t *alldevs = NULL;                 //all interfaces 
+    pcap_if_t *dev = NULL;                     //interface for working with
     char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
     
     //when interface detection fails
@@ -98,7 +98,7 @@ int main(int argc, const char* argv[])
     if (handle == NULL)
     {
         printf("Fehler: %s\n", errbuf);
-        pcap_close(handle);
+        endwin();
         return 1;
     }
 
@@ -142,6 +142,13 @@ int main(int argc, const char* argv[])
         
         int result = pcap_next_ex(handle, &header, &buffer);
 
+        if(result!=1)
+        {
+            perror("Error when Reading Data...");
+            pcap_close(handle);
+            endwin();
+            return 1;
+        }
         //frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
         frame.size = header->len;
         
@@ -151,13 +158,6 @@ int main(int argc, const char* argv[])
         frame.timestamp.tv_sec = timeStampFrame.tv_sec - startCapturing.tv_sec;
         frame.timestamp.tv_nsec = timeStampFrame.tv_nsec - startCapturing.tv_nsec;
 
-        if(result!=1)
-        {
-            perror("Error when Reading Data...");
-            pcap_close(handle);
-            endwin();
-            return 1;
-        }
         
         //parsing ethernet data from buffer to Frame
         //TODO

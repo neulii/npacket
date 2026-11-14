@@ -13,7 +13,7 @@ char selInterf[50];
 
 int main(int argc, const char* argv[])
 {
-    pcap_if_t* alldevs;                 //all interfaces 
+    pcap_if_t *alldevs;                 //all interfaces 
     pcap_if_t *dev;                     //interface for working with
     char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
     
@@ -58,8 +58,8 @@ int main(int argc, const char* argv[])
 
     if(has_colors() == FALSE)
     {
-        endwin();
         printf("your Terminal does not support colors!!");
+        endwin();
         return 1;
     }
     start_color();
@@ -98,6 +98,7 @@ int main(int argc, const char* argv[])
     if (handle == NULL)
     {
         printf("Fehler: %s\n", errbuf);
+        pcap_close(handle);
         return 1;
     }
 
@@ -153,6 +154,8 @@ int main(int argc, const char* argv[])
         if(result!=1)
         {
             perror("Error when Reading Data...");
+            pcap_close(handle);
+            endwin();
             return 1;
         }
         
@@ -170,6 +173,8 @@ int main(int argc, const char* argv[])
         if(ethernetString==NULL)
         {
             printf("error by return outputtext");
+            pcap_close(handle);
+            endwin();
             return 1;
         }
 
@@ -195,6 +200,8 @@ int main(int argc, const char* argv[])
                 
                 if(packet->identifier == NULL)
                 {
+                    pcap_close(handle);
+                    endwin();
                     return 1;
                 }
 
@@ -210,6 +217,8 @@ int main(int argc, const char* argv[])
                 if(IPv4String==NULL)
                 {
                     printf("error by return outputtext");
+                    pcap_close(handle);
+                    endwin();
                     return 1;
                 }
 
@@ -257,6 +266,10 @@ int main(int argc, const char* argv[])
     }   
     
     endwin();           //ends window
+    
+    pcap_close(handle);
+    pcap_freealldevs(alldevs);
+    pcap_freealldevs(dev);
     
     return 0;
 }

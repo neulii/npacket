@@ -11,7 +11,6 @@ set(SOURCES
 
 find_library(PCAP_LIBRARY
         NAMES pcap
-        PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 

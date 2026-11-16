@@ -17,6 +17,12 @@ pcap_t *handle = NULL;
 
 char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
 
+size_t frameArraySize = 100;
+EthernetFrame *capturedFrames = NULL;   //all Frames that are captured
+EthernetFrame *framesToDisplay = NULL;
+
+
+
 
 void cleanUpAndExit();
 
@@ -114,16 +120,16 @@ int main(int argc, const char* argv[])
     EthernetFrame frame;
     IPV4 ipv4;
    
-    size_t frameArraySize = 100;
-    EthernetFrame *capturedFrames = NULL;
+    
     capturedFrames = malloc(sizeof(EthernetFrame) * frameArraySize);
 
  
     bool running = true;
     
     //starting Time
-    struct timespec startCapturing;
-    struct timespec timeStampFrame;
+    struct timespec startCapturing;     //time of Starting the capturing Loop
+    struct timespec timeStampFrame;     //time of the Capturering
+    struct timespec deltaLoop;          //delta from loop to loop
 
     //get Time when capturing starts
     clock_gettime(CLOCK_REALTIME, &startCapturing);
@@ -196,7 +202,6 @@ int main(int argc, const char* argv[])
         parseBufferToFrame(&frame, buffer);
 
         frame.frameNr = frameCounter;
-        frameCounter++;
         
         //build etherent output line
         char *ethernetString = NULL;
@@ -222,6 +227,10 @@ int main(int argc, const char* argv[])
                 //create frame for access (because its from a void pointer)
                 frame.nextLayer = &ipv4;
                 IPV4 *packet= frame.nextLayer;
+                IPV4 *packetArray = malloc(sizeof(IPV4));
+                capturedFrames->nextLayer = packetArray;
+
+
 
                 //set flag and getting memory 
                 char flag[] = "ipv4";
@@ -274,8 +283,9 @@ int main(int argc, const char* argv[])
         }
         
         capturedFrames[frameCounter] = frame;
+        frameCounter++;
        
-        memcpy(&capturedFrames[frameCounter],&frame,sizeof(frame));
+        //memcpy(&capturedFrames[frameCounter],&frame,sizeof(frame));
         wprintw(windowText, "\n"); 
 
         //int x = getcurx(windowText);

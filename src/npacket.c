@@ -11,11 +11,18 @@
 
 char selInterf[50];
 
+pcap_if_t *alldevs = NULL;                 //all interfaces 
+pcap_if_t *dev = NULL;                     //interface for working with
+pcap_t *handle = NULL;
+
+char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
+
+
+void cleanUpAndExit();
+
+
 int main(int argc, const char* argv[])
 {
-    pcap_if_t *alldevs = NULL;                 //all interfaces 
-    pcap_if_t *dev = NULL;                     //interface for working with
-    char errbuf[PCAP_ERRBUF_SIZE];      //errorbuffer for pcap
     
     //when interface detection fails
     if (pcap_findalldevs(&alldevs, errbuf) != 0) {
@@ -88,7 +95,7 @@ int main(int argc, const char* argv[])
     const unsigned char *buffer;    //buffer for getting data from NIC
 
     //create pcap handle
-    pcap_t *handle = pcap_open_live(    selInterf, // interfaceName
+    handle = pcap_open_live(    selInterf, // interfaceName
         65535, // bufferSize
         1,     // promiscouse Mode=1
         1,  // timeout
@@ -106,7 +113,12 @@ int main(int argc, const char* argv[])
 
     EthernetFrame frame;
     IPV4 ipv4;
-    
+   
+    size_t frameArraySize = 100;
+    EthernetFrame *capturedFrames = NULL;
+    capturedFrames = malloc(sizeof(EthernetFrame) * frameArraySize);
+
+ 
     bool running = true;
     
     //starting Time
@@ -119,35 +131,55 @@ int main(int argc, const char* argv[])
     //counter
     long frameCounter = 0;
     
-    int ch;
+    // int ch;
 
     while(running)
     {
         // timeout(1);
         // ch = getch();		
-        if(ch == 'q')
-        {
-            //break;
-            running = false;
-            endwin();
-        }
-        if(ch == KEY_UP)
-        {
-            init_pair(1, COLOR_WHITE, COLOR_BLUE);
-        }
-        if(ch == KEY_DOWN)
-        {
-           init_pair(1, COLOR_WHITE, COLOR_YELLOW);
-        }
+        // if(ch == 'q')
+        // {
+        //     //break;
+        //     running = false;
+        //     endwin();
+        // }
+        // if(ch == KEY_UP)
+        // {
+        //     init_pair(1, COLOR_WHITE, COLOR_BLUE);
+        // }
+        // if(ch == KEY_DOWN)
+        // {
+        //    init_pair(1, COLOR_WHITE, COLOR_YELLOW);
+        // }
         
+        //check array for saving frames if size is large enough
+        size_t arrayFrameBuffer = 10;
+        size_t sizeNewMemory = 100;
+
+        if(frameCounter + arrayFrameBuffer >= frameArraySize)
+        {
+            EthernetFrame *temp = realloc(capturedFrames, sizeof(capturedFrames[0]) * (frameArraySize + sizeNewMemory));
+
+            if(temp==NULL)
+            { 
+                printf("Error when allocating new Memory for frames...");
+                free(capturedFrames);
+                cleanUpAndExit();
+            }
+            else
+            {
+                capturedFrames = temp;
+                frameArraySize = frameArraySize + sizeNewMemory;
+            }
+            
+        }
+
         int result = pcap_next_ex(handle, &header, &buffer);
 
         if(result!=1)
         {
             perror("Error when Reading Data...");
-            pcap_close(handle);
-            endwin();
-            return 1;
+            cleanUpAndExit();
         }
         //frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
         frame.size = header->len;
@@ -173,9 +205,7 @@ int main(int argc, const char* argv[])
         if(ethernetString==NULL)
         {
             printf("error by return outputtext");
-            pcap_close(handle);
-            endwin();
-            return 1;
+            cleanUpAndExit();
         }
 
         wprintw(windowText, "%s",ethernetString); 
@@ -200,9 +230,7 @@ int main(int argc, const char* argv[])
                 
                 if(packet->identifier == NULL)
                 {
-                    pcap_close(handle);
-                    endwin();
-                    return 1;
+                    cleanUpAndExit();
                 }
 
                 strcpy(packet->identifier,flag);
@@ -217,9 +245,7 @@ int main(int argc, const char* argv[])
                 if(IPv4String==NULL)
                 {
                     printf("error by return outputtext");
-                    pcap_close(handle);
-                    endwin();
-                    return 1;
+                    cleanUpAndExit();
                 }
 
                 wprintw(windowText, " || %s",IPv4String); 
@@ -247,6 +273,9 @@ int main(int argc, const char* argv[])
                 break;
         }
         
+        capturedFrames[frameCounter] = frame;
+       
+        memcpy(&capturedFrames[frameCounter],&frame,sizeof(frame));
         wprintw(windowText, "\n"); 
 
         //int x = getcurx(windowText);
@@ -272,4 +301,15 @@ int main(int argc, const char* argv[])
     pcap_freealldevs(dev);
     
     return 0;
+}
+
+void cleanUpAndExit()
+{
+    pcap_close(handle);
+    pcap_freealldevs(alldevs);
+    pcap_freealldevs(dev);
+    endwin();
+    exit(1);
+    
+
 }

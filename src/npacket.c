@@ -213,7 +213,7 @@ int main(int argc, const char* argv[])
             cleanUpAndExit();
         }
 
-        wprintw(windowText, "%s",ethernetString); 
+        //wprintw(windowText, "%s",ethernetString); 
         
         free(ethernetString);
 
@@ -257,7 +257,7 @@ int main(int argc, const char* argv[])
                     cleanUpAndExit();
                 }
 
-                wprintw(windowText, " || %s",IPv4String); 
+                //wprintw(windowText, " || %s",IPv4String); 
                 
                 //cleanup
                 free(IPv4String);

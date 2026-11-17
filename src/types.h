@@ -39,6 +39,12 @@ enum IPV4Data
     IP_DST_LENGTH      = 4
 };
 
+enum IPV4Protocols
+{
+    IPV4_TCP = 6,
+    IPV4_UDP = 17
+};
+
 typedef struct
 {
     
@@ -50,6 +56,8 @@ typedef struct
     uint8_t dst_ip[IP_DST_LENGTH];
     
 } IPV4;
+
+
 
 
 //================         ARP Definition        ================
@@ -74,6 +82,12 @@ enum ARPData
 //==================================================================
 
 //Layer 2  -> EthernetFrame
+
+enum Ethertypes
+{
+    TYPE_IPV4 = 0x0800,
+    TYPE_ARP  = 0x0806
+};
 
 //describes the positions and offsets of the fields
 enum EthernetData

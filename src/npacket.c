@@ -82,6 +82,8 @@ int main(int argc, const char* argv[])
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
     init_pair(3, COLOR_WHITE, COLOR_RED);
+    init_pair(4, COLOR_WHITE, COLOR_YELLOW);
+    init_pair(5, COLOR_WHITE, COLOR_GREEN);
 
     int terminalX = COLS;
     int terminalY = LINES;
@@ -120,7 +122,7 @@ int main(int argc, const char* argv[])
 
     struct pcap_pkthdr *header;
 
-    EthernetFrame frame;
+    //EthernetFrame frame;
     //IPV4 ipv4;
    
     
@@ -144,6 +146,7 @@ int main(int argc, const char* argv[])
 
     while(running)
     {
+        EthernetFrame frame = {0};
         timeout(1);
         ch = getch();		
         if(ch == 'q')
@@ -270,7 +273,7 @@ int main(int argc, const char* argv[])
        
         //print the last frames
         
-        printEthernetFramesToWindow(windowText, capturedFrames,frameCounter-60, frameCounter);
+        printEthernetFramesToWindow(windowText, capturedFrames,frameCounter-50, frameCounter);
 
         box(windowFrame, 0,0);
         
@@ -308,48 +311,59 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
     for(size_t i = start; i < end; i++)
     {
 
-        char *output = buildEthernetOutput(&frames[i]);
-        
         int16_t etherType = ((uint16_t)frames[i].type[0] << 8) | frames[i].type[1];
-
+        
+        char *outputEthernet = buildEthernetOutput(&frames[i]);
+        
         switch (etherType)
         {
             case 0x0800:
-                
+            
                 IPV4 *packet = frames[i].nextLayer;
-
+                
                 switch (*packet->protocol)
                 {
                     case IPV4_TCP:
+                        char *outputIPv4 = buildIPv4Output(&frames[i]);
                         //init_pair(1, COLOR_WHITE, COLOR_BLUE);
                         wattron(win,COLOR_PAIR(2));
-                        wprintw(win, "%s\n",output); 
+                        wprintw(win, "%s || %s\n",outputEthernet, outputIPv4); 
                         //wrefresh(win);
                         wattroff(win,COLOR_PAIR(1));
                         break;
                     case IPV4_UDP:
                         wattron(win,COLOR_PAIR(3));
-                        wprintw(win, "%s\n", output); 
+                        wprintw(win, "%s\n", outputEthernet); 
                         wattroff(win,COLOR_PAIR(1));
                         break;
                     
                     default:
+                        wattron(win,COLOR_PAIR(1));
+                        wprintw(win, "%s\n", outputEthernet); 
+                        wattroff(win,COLOR_PAIR(1));
+                    
                         break;
                 }
-            
-                
+                   
                 break;
             
             case TYPE_ARP:
+                wattron(win,COLOR_PAIR(4));
+                wprintw(win, "%s\n", outputEthernet); 
+                wattroff(win,COLOR_PAIR(1));
+                
                 break;
+                
+            
             default:
-                break;
+                wattron(win,COLOR_PAIR(5));
+                wprintw(win, "%s\n", outputEthernet); 
+                wattroff(win,COLOR_PAIR(1));
+
+               
+
+            break;
         }
-
-       
-
-
-
     }
 
     return;

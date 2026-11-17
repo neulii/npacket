@@ -1,6 +1,8 @@
 - save capture files
 - open capture files
 
+- show which pid / app is receiving/sending the packets
+
 - filter for src/dst and so on.
 
 - implement all code with pcap

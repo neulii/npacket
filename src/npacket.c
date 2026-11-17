@@ -21,8 +21,8 @@ size_t frameArraySize = 100;
 EthernetFrame *capturedFrames = NULL;   //all Frames that are captured
 EthernetFrame *framesToDisplay = NULL;
 
-
-
+void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end);
+void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay);
 
 void cleanUpAndExit();
 
@@ -61,7 +61,9 @@ int main(int argc, const char* argv[])
                 printf("\n");
             }
         }
-        return 0;
+        //TEMP FOR DEVELOPING
+        strcpy(selInterf, alldevs[0].name);
+        //return 0;
     }
     
     
@@ -285,17 +287,19 @@ int main(int argc, const char* argv[])
         capturedFrames[frameCounter] = frame;
         frameCounter++;
        
-        //memcpy(&capturedFrames[frameCounter],&frame,sizeof(frame));
-        wprintw(windowText, "\n"); 
+        
+        //wprintw(windowText, "\n"); 
 
         //int x = getcurx(windowText);
-        int y = getcury(windowText);
+        //int y = getcury(windowText);
 
-        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
-        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
+        //mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
+        //mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
         
-        wmove(windowText,y,0);
+        //wmove(windowText,y,0);
        
+        printEthernetFramesToWindow(windowText, capturedFrames,0,20);
+
         box(windowFrame, 0,0);
         
         wrefresh(windowFrame);
@@ -321,5 +325,30 @@ void cleanUpAndExit()
     endwin();
     exit(1);
     
+
+}
+
+
+void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end)
+{
+    wmove(win,0,0); //beginning left top
+
+    for(size_t i = start; i < end; i++)
+    {
+
+        char *output = buildEthernetOutput(&frames[i]);
+        
+        wprintw(win, "%s\n",output); 
+
+
+
+    }
+    
+    return;
+}
+
+void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay)
+{
+
 
 }

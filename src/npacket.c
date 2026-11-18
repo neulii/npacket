@@ -162,7 +162,7 @@ int main(int argc, const char* argv[])
         {
             //break;
             running = false;
-            //endwin();
+            cleanUpAndExit();
         }
         // if(ch == KEY_UP)
         // {

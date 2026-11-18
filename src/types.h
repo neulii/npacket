@@ -41,7 +41,8 @@ enum IPV4Data
 
 enum IPV4Protocols
 {
-    IPV4_TCP = 6,
+    IPV4_ICMP = 1,
+    IPV4_TCP =  6,
     IPV4_UDP = 17
 };
 

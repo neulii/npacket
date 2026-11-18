@@ -79,12 +79,22 @@ int main(int argc, const char* argv[])
     }
     start_color();
 
+    //TODO Colorinitialising dont works now
+    #define ORANGE 10
+
+    init_color(ORANGE, 1000, 1000, 1000);
+
+
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
     init_pair(3, COLOR_WHITE, COLOR_RED);
     init_pair(4, COLOR_WHITE, COLOR_YELLOW);
     init_pair(5, COLOR_WHITE, COLOR_GREEN);
+    init_pair(6, COLOR_WHITE, COLOR_MAGENTA);
+    init_pair(7, COLOR_WHITE, COLOR_CYAN);
+    init_pair(8, COLOR_WHITE, ORANGE);
 
+    
     int terminalX = COLS;
     int terminalY = LINES;
 
@@ -339,19 +349,25 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
                         char *outputIPv4 = buildIPv4Output(&frames[i]);
                         //init_pair(1, COLOR_WHITE, COLOR_BLUE);
                         wattron(win,COLOR_PAIR(2));
-                        wprintw(win, "%s || %s\n",outputEthernet, outputIPv4); 
+                        wprintw(win, "%s || TCP || %s\n",outputEthernet, outputIPv4); 
                         //wrefresh(win);
                         wattroff(win,COLOR_PAIR(1));
                         break;
                     case IPV4_UDP:
                         wattron(win,COLOR_PAIR(3));
-                        wprintw(win, "%s\n", outputEthernet); 
+                        wprintw(win, "%s || UDP\n", outputEthernet); 
+                        wattroff(win,COLOR_PAIR(1));
+                        break;
+                    
+                    case IPV4_ICMP:
+                        wattron(win,COLOR_PAIR(8));
+                        wprintw(win, "%s || ICMP\n", outputEthernet); 
                         wattroff(win,COLOR_PAIR(1));
                         break;
                     
                     default:
                         wattron(win,COLOR_PAIR(1));
-                        wprintw(win, "%s\n", outputEthernet); 
+                        wprintw(win, "%s || IPV4 == not parsed yet ==\n", outputEthernet); 
                         wattroff(win,COLOR_PAIR(1));
                     
                         break;
@@ -361,7 +377,7 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
             
             case TYPE_ARP:
                 wattron(win,COLOR_PAIR(4));
-                wprintw(win, "%s\n", outputEthernet); 
+                wprintw(win, "%s || ARP\n", outputEthernet); 
                 wattroff(win,COLOR_PAIR(1));
                 
                 break;
@@ -369,7 +385,7 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
             
             default:
                 wattron(win,COLOR_PAIR(5));
-                wprintw(win, "%s\n", outputEthernet); 
+                wprintw(win, "%s || ALL THE REST\n", outputEthernet); 
                 wattroff(win,COLOR_PAIR(1));
 
                

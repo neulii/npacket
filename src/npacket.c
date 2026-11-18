@@ -24,7 +24,7 @@ EthernetFrame *framesToDisplay = NULL;
 void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end);
 void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay);
 
-void cleanUpAndExit();
+void cleanUpAndExit(void);
 
 
 int main(int argc, const char* argv[])
@@ -204,7 +204,6 @@ int main(int argc, const char* argv[])
 
         
         //parsing ethernet data from buffer to Frame
-        //TODO
         parseBufferToFrame(&frame, buffer);
 
         frame.frameNr = frameCounter;
@@ -271,9 +270,23 @@ int main(int argc, const char* argv[])
         
         //wmove(windowText,y,0);
        
-        //print the last frames
         
-        printEthernetFramesToWindow(windowText, capturedFrames,frameCounter-50, frameCounter);
+
+        //print the last frames
+        unsigned int showingItems = 50;
+
+        unsigned int startPrinting = 0;
+
+        if (frameCounter < showingItems)
+        {
+            startPrinting = 0;
+        }
+        else
+        {
+            startPrinting = frameCounter-showingItems;
+        }
+
+        printEthernetFramesToWindow(windowText, capturedFrames,startPrinting, frameCounter);
 
         box(windowFrame, 0,0);
         
@@ -310,7 +323,6 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
 
     for(size_t i = start; i < end; i++)
     {
-
         int16_t etherType = ((uint16_t)frames[i].type[0] << 8) | frames[i].type[1];
         
         char *outputEthernet = buildEthernetOutput(&frames[i]);

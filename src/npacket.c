@@ -80,10 +80,9 @@ int main(int argc, const char* argv[])
     start_color();
 
     //TODO Colorinitialising dont works now
-    #define ORANGE 10
+    #define COLOR_ORANGE 10
 
-    init_color(ORANGE, 1000, 1000, 1000);
-
+    init_color(COLOR_ORANGE, 1000, 647, 0);
 
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
@@ -92,8 +91,8 @@ int main(int argc, const char* argv[])
     init_pair(5, COLOR_WHITE, COLOR_GREEN);
     init_pair(6, COLOR_WHITE, COLOR_MAGENTA);
     init_pair(7, COLOR_WHITE, COLOR_CYAN);
-    init_pair(8, COLOR_WHITE, ORANGE);
-
+    init_pair(8, COLOR_WHITE, COLOR_ORANGE);
+    //init_pair(8, COLOR_WHITE,3);
     
     int terminalX = COLS;
     int terminalY = LINES;

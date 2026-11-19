@@ -6,7 +6,7 @@
     "cmake.debugConfig": {
         "MIMode": "gdb",
         "miDebuggerPath": "/usr/local/bin/gdb-root",
-        "externalConsole": false,
-        "args": ["eno1"]
+        "externalConsole": false
+        //"args": ["eno1"]
     },
 }

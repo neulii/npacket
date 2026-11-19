@@ -21,10 +21,10 @@ size_t frameArraySize = 100;
 EthernetFrame *capturedFrames = NULL;   //all Frames that are captured
 EthernetFrame *framesToDisplay = NULL;
 
+void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end);
+void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay);
 
-
-
-void cleanUpAndExit();
+void cleanUpAndExit(void);
 
 
 int main(int argc, const char* argv[])
@@ -61,7 +61,9 @@ int main(int argc, const char* argv[])
                 printf("\n");
             }
         }
-        return 0;
+        //TEMP FOR DEVELOPING
+        strcpy(selInterf, alldevs[0].name);
+        //return 0;
     }
     
     
@@ -77,9 +79,21 @@ int main(int argc, const char* argv[])
     }
     start_color();
 
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_WHITE, COLOR_BLACK);
+    //TODO Colorinitialising dont works now
+    #define COLOR_ORANGE 10
 
+    init_color(COLOR_ORANGE, 1000, 647, 0);
+
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_WHITE, COLOR_BLUE);
+    init_pair(3, COLOR_WHITE, COLOR_RED);
+    init_pair(4, COLOR_WHITE, COLOR_YELLOW);
+    init_pair(5, COLOR_WHITE, COLOR_GREEN);
+    init_pair(6, COLOR_WHITE, COLOR_MAGENTA);
+    init_pair(7, COLOR_WHITE, COLOR_CYAN);
+    init_pair(8, COLOR_WHITE, COLOR_ORANGE);
+    //init_pair(8, COLOR_WHITE,3);
+    
     int terminalX = COLS;
     int terminalY = LINES;
 
@@ -94,7 +108,7 @@ int main(int argc, const char* argv[])
     WINDOW *windowFrame = newwin(height, width, windowY, windowX);
     WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
 
-    scrollok(windowText, TRUE);
+    //scrollok(windowText, TRUE);
 
     keypad(stdscr, TRUE);           //for special keys
 
@@ -117,8 +131,8 @@ int main(int argc, const char* argv[])
 
     struct pcap_pkthdr *header;
 
-    EthernetFrame frame;
-    IPV4 ipv4;
+    //EthernetFrame frame;
+    //IPV4 ipv4;
    
     
     capturedFrames = malloc(sizeof(EthernetFrame) * frameArraySize);
@@ -137,18 +151,19 @@ int main(int argc, const char* argv[])
     //counter
     long frameCounter = 0;
     
-    // int ch;
+    int ch;
 
     while(running)
     {
-        // timeout(1);
-        // ch = getch();		
-        // if(ch == 'q')
-        // {
-        //     //break;
-        //     running = false;
-        //     endwin();
-        // }
+        EthernetFrame frame = {0};
+        timeout(1);
+        ch = getch();		
+        if(ch == 'q')
+        {
+            //break;
+            running = false;
+            cleanUpAndExit();
+        }
         // if(ch == KEY_UP)
         // {
         //     init_pair(1, COLOR_WHITE, COLOR_BLUE);
@@ -198,7 +213,6 @@ int main(int argc, const char* argv[])
 
         
         //parsing ethernet data from buffer to Frame
-        //TODO
         parseBufferToFrame(&frame, buffer);
 
         frame.frameNr = frameCounter;
@@ -213,7 +227,7 @@ int main(int argc, const char* argv[])
             cleanUpAndExit();
         }
 
-        wprintw(windowText, "%s",ethernetString); 
+        //wprintw(windowText, "%s",ethernetString); 
         
         free(ethernetString);
 
@@ -223,50 +237,19 @@ int main(int argc, const char* argv[])
         switch (etherType)
         {
             //if IP Protocol 0x0800
-            case 0x0800:
-                //create frame for access (because its from a void pointer)
-                frame.nextLayer = &ipv4;
-                IPV4 *packet= frame.nextLayer;
-                IPV4 *packetArray = malloc(sizeof(IPV4));
-                capturedFrames->nextLayer = packetArray;
-
-
-
-                //set flag and getting memory 
-                char flag[] = "ipv4";
-                //char *flagTemp = malloc(sizeof flag);
-                packet->identifier = malloc(sizeof flag);
-                
-                if(packet->identifier == NULL)
-                {
+            case TYPE_IPV4:
+                IPV4 *packet = malloc(sizeof *packet);
+                if (packet == NULL) {
                     cleanUpAndExit();
                 }
 
-                strcpy(packet->identifier,flag);
-
-                //parsing data to packet type
+                frame.nextLayer = packet;
                 parseBufferToPacket(packet, buffer);
 
-                //print ipv4 specific part
-                char *IPv4String = NULL;
-                IPv4String = buildIPv4Output(&frame);
-                
-                if(IPv4String==NULL)
-                {
-                    printf("error by return outputtext");
-                    cleanUpAndExit();
-                }
-
-                wprintw(windowText, " || %s",IPv4String); 
-                
-                //cleanup
-                free(IPv4String);
-                free(packet->identifier);
-                
                 break;
             
             //if ARP Protocol 0x0806
-            case 0x0806:
+            case TYPE_ARP:
                 //create frame for access (because its from a void pointer)
                 //just code ... isnt implemented 
                 //ARP *ARPpacket= frame.nextLayer;
@@ -285,17 +268,35 @@ int main(int argc, const char* argv[])
         capturedFrames[frameCounter] = frame;
         frameCounter++;
        
-        //memcpy(&capturedFrames[frameCounter],&frame,sizeof(frame));
-        wprintw(windowText, "\n"); 
+        
+        //wprintw(windowText, "\n"); 
 
         //int x = getcurx(windowText);
-        int y = getcury(windowText);
+        //int y = getcury(windowText);
 
-        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
-        mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
+        //mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 2, NULL);
+        //mvwchgat(windowText, cursorLine, 0, width, A_NORMAL, 1, NULL);
         
-        wmove(windowText,y,0);
+        //wmove(windowText,y,0);
        
+        
+
+        //print the last frames
+        unsigned int showingItems = 50;
+
+        unsigned int startPrinting = 0;
+
+        if (frameCounter < showingItems)
+        {
+            startPrinting = 0;
+        }
+        else
+        {
+            startPrinting = frameCounter-showingItems;
+        }
+
+        printEthernetFramesToWindow(windowText, capturedFrames,startPrinting, frameCounter);
+
         box(windowFrame, 0,0);
         
         wrefresh(windowFrame);
@@ -321,5 +322,82 @@ void cleanUpAndExit()
     endwin();
     exit(1);
     
+
+}
+
+
+void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end)
+{
+    wmove(win,0,0); //beginning left top
+
+    for(size_t i = start; i < end; i++)
+    {
+        int16_t etherType = ((uint16_t)frames[i].type[0] << 8) | frames[i].type[1];
+        
+        char *outputEthernet = buildEthernetOutput(&frames[i]);
+        
+        switch (etherType)
+        {
+            case 0x0800:
+            
+                IPV4 *packet = frames[i].nextLayer;
+                
+                switch (*packet->protocol)
+                {
+                    case IPV4_TCP:
+                        char *outputIPv4 = buildIPv4Output(&frames[i]);
+                        //init_pair(1, COLOR_WHITE, COLOR_BLUE);
+                        wattron(win,COLOR_PAIR(2));
+                        wprintw(win, "%s || TCP || %s\n",outputEthernet, outputIPv4); 
+                        //wrefresh(win);
+                        wattroff(win,COLOR_PAIR(1));
+                        break;
+                    case IPV4_UDP:
+                        wattron(win,COLOR_PAIR(3));
+                        wprintw(win, "%s || UDP\n", outputEthernet); 
+                        wattroff(win,COLOR_PAIR(1));
+                        break;
+                    
+                    case IPV4_ICMP:
+                        wattron(win,COLOR_PAIR(8));
+                        wprintw(win, "%s || ICMP\n", outputEthernet); 
+                        wattroff(win,COLOR_PAIR(1));
+                        break;
+                    
+                    default:
+                        wattron(win,COLOR_PAIR(1));
+                        wprintw(win, "%s || IPV4 == not parsed yet ==\n", outputEthernet); 
+                        wattroff(win,COLOR_PAIR(1));
+                    
+                        break;
+                }
+                   
+                break;
+            
+            case TYPE_ARP:
+                wattron(win,COLOR_PAIR(4));
+                wprintw(win, "%s || ARP\n", outputEthernet); 
+                wattroff(win,COLOR_PAIR(1));
+                
+                break;
+                
+            
+            default:
+                wattron(win,COLOR_PAIR(5));
+                wprintw(win, "%s || ALL THE REST\n", outputEthernet); 
+                wattroff(win,COLOR_PAIR(1));
+
+               
+
+            break;
+        }
+    }
+
+    return;
+}
+
+void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay)
+{
+
 
 }

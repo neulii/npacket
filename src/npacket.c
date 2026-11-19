@@ -307,6 +307,10 @@ int main(int argc, const char* argv[])
     
     endwin();           //ends window
     
+
+    
+
+
     pcap_close(handle);
     pcap_freealldevs(alldevs);
     pcap_freealldevs(dev);
@@ -319,6 +323,8 @@ void cleanUpAndExit()
     pcap_close(handle);
     pcap_freealldevs(alldevs);
     pcap_freealldevs(dev);
+    free(capturedFrames);
+    
     endwin();
     exit(1);
     
@@ -335,7 +341,8 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
         int16_t etherType = ((uint16_t)frames[i].type[0] << 8) | frames[i].type[1];
         
         char *outputEthernet = buildEthernetOutput(&frames[i]);
-        
+        char *outputIPv4;
+
         switch (etherType)
         {
             case 0x0800:
@@ -345,7 +352,7 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
                 switch (*packet->protocol)
                 {
                     case IPV4_TCP:
-                        char *outputIPv4 = buildIPv4Output(&frames[i]);
+                        outputIPv4 = buildIPv4Output(&frames[i]);
                         //init_pair(1, COLOR_WHITE, COLOR_BLUE);
                         wattron(win,COLOR_PAIR(2));
                         wprintw(win, "%s || TCP || %s\n",outputEthernet, outputIPv4); 
@@ -391,7 +398,11 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
 
             break;
         }
+        
+        free(outputEthernet);
+        free(outputIPv4);
     }
+    
 
     return;
 }

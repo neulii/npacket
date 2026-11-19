@@ -184,7 +184,7 @@ int main(int argc, const char* argv[])
             if(temp==NULL)
             { 
                 printf("Error when allocating new Memory for frames...");
-                free(capturedFrames);
+                //free(capturedFrames);
                 cleanUpAndExit();
             }
             else
@@ -217,20 +217,6 @@ int main(int argc, const char* argv[])
 
         frame.frameNr = frameCounter;
         
-        //build etherent output line
-        char *ethernetString = NULL;
-        ethernetString = buildEthernetOutput(&frame);
-        
-        if(ethernetString==NULL)
-        {
-            printf("error by return outputtext");
-            cleanUpAndExit();
-        }
-
-        //wprintw(windowText, "%s",ethernetString); 
-        
-        free(ethernetString);
-
         //converts 2 bytes in one datatype for comparing in switch
         int16_t etherType = ((uint16_t)frame.type[0] << 8) | frame.type[1];
 
@@ -400,7 +386,7 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
         }
         
         free(outputEthernet);
-        free(outputIPv4);
+        //free(outputIPv4);
     }
     
 

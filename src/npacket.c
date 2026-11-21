@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -21,11 +20,15 @@ size_t frameArraySize = 100;
 EthernetFrame *capturedFrames = NULL;   //all Frames that are captured
 EthernetFrame *framesToDisplay = NULL;
 
+WINDOW *windowFrame = NULL;
+WINDOW *windowText = NULL;
+
+long frameCounter = 0;
+
 void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end);
 void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay);
 
-void cleanUpAndExit(void);
-
+void cleanUp(void);
 
 int main(int argc, const char* argv[])
 {
@@ -40,8 +43,18 @@ int main(int argc, const char* argv[])
     if(argc>1)
     {
         //printf("%s\n", argv[1]);
-        strcpy(selInterf, argv[1]);
-        printf("%s\n", selInterf);
+        if (strlen(argv[1]) >= sizeof selInterf)
+        {
+            printf("Argument too long!!");
+            cleanUp();
+            return EXIT_FAILURE;
+        }
+        else
+        {
+            strcpy(selInterf, argv[1]);
+
+        }
+        //printf("%s\n", selInterf);
         
     }
     else            //when no cli parameters list all interfaces
@@ -62,10 +75,14 @@ int main(int argc, const char* argv[])
             }
         }
         //TEMP FOR DEVELOPING
+        if(alldevs == NULL)
+        {
+            cleanUp();
+            return EXIT_FAILURE;
+        }
         strcpy(selInterf, alldevs[0].name);
         //return 0;
     }
-    
     
     initscr();
     noecho();
@@ -74,8 +91,8 @@ int main(int argc, const char* argv[])
     if(has_colors() == FALSE)
     {
         printf("your Terminal does not support colors!!");
-        endwin();
-        return 1;
+        cleanUp();
+        return EXIT_FAILURE;
     }
     start_color();
 
@@ -105,8 +122,19 @@ int main(int argc, const char* argv[])
 
     int cursorLine = 0;
 
-    WINDOW *windowFrame = newwin(height, width, windowY, windowX);
-    WINDOW *windowText = derwin(windowFrame, height - 2, width - 2, 1,1);
+    windowFrame = newwin(height, width, windowY, windowX);
+    if (windowFrame == NULL) 
+    {
+        cleanUp();
+        return EXIT_FAILURE;
+    }
+
+    windowText = derwin(windowFrame, height - 2, width - 2, 1, 1);
+    if (windowText == NULL)
+    {
+        cleanUp();
+        return EXIT_FAILURE;
+    }
 
     //scrollok(windowText, TRUE);
 
@@ -125,8 +153,8 @@ int main(int argc, const char* argv[])
     if (handle == NULL)
     {
         printf("Fehler: %s\n", errbuf);
-        endwin();
-        return 1;
+        cleanUp();
+        return EXIT_FAILURE;
     }
 
     struct pcap_pkthdr *header;
@@ -136,7 +164,11 @@ int main(int argc, const char* argv[])
    
     
     capturedFrames = malloc(sizeof(EthernetFrame) * frameArraySize);
-
+    if(capturedFrames == NULL)
+    {
+        cleanUp();
+        return EXIT_FAILURE;
+    }
  
     bool running = true;
     
@@ -149,7 +181,6 @@ int main(int argc, const char* argv[])
     clock_gettime(CLOCK_REALTIME, &startCapturing);
 
     //counter
-    long frameCounter = 0;
     
     int ch;
 
@@ -162,7 +193,8 @@ int main(int argc, const char* argv[])
         {
             //break;
             running = false;
-            cleanUpAndExit();
+            cleanUp();
+            return(EXIT_SUCCESS);
         }
         // if(ch == KEY_UP)
         // {
@@ -184,8 +216,9 @@ int main(int argc, const char* argv[])
             if(temp==NULL)
             { 
                 printf("Error when allocating new Memory for frames...");
-                free(capturedFrames);
-                cleanUpAndExit();
+                //free(capturedFrames);
+                cleanUp();
+                return EXIT_FAILURE;
             }
             else
             {
@@ -200,7 +233,8 @@ int main(int argc, const char* argv[])
         if(result!=1)
         {
             perror("Error when Reading Data...");
-            cleanUpAndExit();
+            cleanUp();
+            return EXIT_FAILURE;
         }
         //frame.size = recvfrom(sock_raw,buffer,sizeof(buffer), 0, NULL, NULL);
         frame.size = header->len;
@@ -211,26 +245,16 @@ int main(int argc, const char* argv[])
         frame.timestamp.tv_sec = timeStampFrame.tv_sec - startCapturing.tv_sec;
         frame.timestamp.tv_nsec = timeStampFrame.tv_nsec - startCapturing.tv_nsec;
 
-        
+        //check if buffer is long enough
+        if (header->caplen < 14) 
+        {
+            continue;
+        }
         //parsing ethernet data from buffer to Frame
         parseBufferToFrame(&frame, buffer);
 
         frame.frameNr = frameCounter;
         
-        //build etherent output line
-        char *ethernetString = NULL;
-        ethernetString = buildEthernetOutput(&frame);
-        
-        if(ethernetString==NULL)
-        {
-            printf("error by return outputtext");
-            cleanUpAndExit();
-        }
-
-        //wprintw(windowText, "%s",ethernetString); 
-        
-        free(ethernetString);
-
         //converts 2 bytes in one datatype for comparing in switch
         int16_t etherType = ((uint16_t)frame.type[0] << 8) | frame.type[1];
 
@@ -238,9 +262,20 @@ int main(int argc, const char* argv[])
         {
             //if IP Protocol 0x0800
             case TYPE_IPV4:
+                //check if header is long enough
+                // 14 Bytes Ethernet
+                // + 16 Bytes Position der Zieladresse innerhalb von IPv4
+                // +  4 Bytes Zieladresse
+                // = 34 benötigte Bytes
+                if(header->caplen < 34)
+                {
+                    continue;
+                }
+
                 IPV4 *packet = malloc(sizeof *packet);
                 if (packet == NULL) {
-                    cleanUpAndExit();
+                    cleanUp();
+                    return EXIT_FAILURE;
                 }
 
                 frame.nextLayer = packet;
@@ -268,7 +303,6 @@ int main(int argc, const char* argv[])
         capturedFrames[frameCounter] = frame;
         frameCounter++;
        
-        
         //wprintw(windowText, "\n"); 
 
         //int x = getcurx(windowText);
@@ -279,8 +313,6 @@ int main(int argc, const char* argv[])
         
         //wmove(windowText,y,0);
        
-        
-
         //print the last frames
         unsigned int showingItems = 50;
 
@@ -305,26 +337,31 @@ int main(int argc, const char* argv[])
         refresh();          // writes the windows
     }   
     
-    endwin();           //ends window
-    
-    pcap_close(handle);
-    pcap_freealldevs(alldevs);
-    pcap_freealldevs(dev);
+    cleanUp();
     
     return 0;
 }
 
-void cleanUpAndExit()
+void cleanUp()
 {
-    pcap_close(handle);
+    if(handle != NULL)
+    {
+        pcap_close(handle);
+    }
     pcap_freealldevs(alldevs);
-    pcap_freealldevs(dev);
-    endwin();
-    exit(1);
     
+    for(long i = 0; i < frameCounter; i++)
+    {
+        free(capturedFrames[i].nextLayer);
+    }
+    
+    free(capturedFrames);
 
+    delwin(windowText);
+    delwin(windowFrame);
+
+    endwin();
 }
-
 
 void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t start, size_t end)
 {
@@ -335,7 +372,13 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
         int16_t etherType = ((uint16_t)frames[i].type[0] << 8) | frames[i].type[1];
         
         char *outputEthernet = buildEthernetOutput(&frames[i]);
-        
+        if(outputEthernet == NULL)
+        {
+           return;
+        }
+
+        char *outputIPv4;
+
         switch (etherType)
         {
             case 0x0800:
@@ -345,12 +388,19 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
                 switch (*packet->protocol)
                 {
                     case IPV4_TCP:
-                        char *outputIPv4 = buildIPv4Output(&frames[i]);
+                        outputIPv4 = buildIPv4Output(&frames[i]);
+                        if(outputIPv4 == NULL)
+                        {
+                            free(outputEthernet);
+                            return;
+                        }
                         //init_pair(1, COLOR_WHITE, COLOR_BLUE);
                         wattron(win,COLOR_PAIR(2));
                         wprintw(win, "%s || TCP || %s\n",outputEthernet, outputIPv4); 
                         //wrefresh(win);
                         wattroff(win,COLOR_PAIR(1));
+                        free(outputIPv4);
+
                         break;
                     case IPV4_UDP:
                         wattron(win,COLOR_PAIR(3));
@@ -387,17 +437,17 @@ void printEthernetFramesToWindow(WINDOW *win, EthernetFrame* frames, size_t star
                 wprintw(win, "%s || ALL THE REST\n", outputEthernet); 
                 wattroff(win,COLOR_PAIR(1));
 
-               
-
             break;
         }
+        
+        free(outputEthernet);
+        //free(outputIPv4);
     }
-
+    
     return;
 }
 
 void copyVisibleFramesToArray(EthernetFrame *captured, EthernetFrame *framesToDisplay)
 {
-
 
 }
